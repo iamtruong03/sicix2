@@ -15,18 +15,67 @@ public class Job {
 
 	private String jobName;
 
-	// Người giao việc (assigner)
+	// Người tạo
 	@ManyToOne
-	@JoinColumn(name = "assigner_id", referencedColumnName = "id")
+	@JoinColumn(name = "created_id", referencedColumnName = "id")
 	private User createdId;
 
-	// Người nhận việc (recipient)
+	// Người thực hiện
 	@ManyToOne
-	@JoinColumn(name = "recipient_id", referencedColumnName = "id")
-	private User recipientId;
+	@JoinColumn(name = "executed_id", referencedColumnName = "id")
+	private User executedId;
 
 	@Enumerated(EnumType.STRING)
 	private JobStatus status; // Trạng thái công việc
 
 	private LocalDateTime deadline; // Hạn chót công việc
+
+	public Long getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
+	}
+
+	public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	public User getCreatedId() {
+		return createdId;
+	}
+
+	public void setCreatedId(User createdId) {
+		this.createdId = createdId;
+	}
+
+	public User getExecutedId() {
+		return executedId;
+	}
+
+	public void setExecutedId(User executedId) {
+		this.executedId = executedId;
+	}
+
+	public JobStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(JobStatus status) {
+		this.status = status;
+	}
+
+	public LocalDateTime getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(LocalDateTime deadline) {
+		this.deadline = deadline;
+	}
+
 }

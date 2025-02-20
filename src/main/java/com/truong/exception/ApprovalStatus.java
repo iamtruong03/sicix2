@@ -1,7 +1,6 @@
 package com.truong.exception;
 
 public enum ApprovalStatus {
-	PENDING, // Đang chờ phê duyệt
-	APPROVED, // Đã phê duyệt
+	APPROVED, // Phê duyệt
 	REJECTED // Từ chối
 }

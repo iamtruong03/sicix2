@@ -1,30 +1,29 @@
 package com.truong.entities;
 
-import jakarta.persistence.Entity;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 import com.truong.exception.ApprovalStatus;
 
-import jakarta.persistence.*;
-
 @Entity
 @Table(name = "job_approval")
 public class JobApproval {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "job_id")
-	private Job job;
+    private LocalDateTime approvalDate; // Ngày phê duyệt
 
-	@ManyToOne
-	@JoinColumn(name = "approver_id")
-	private User approver;
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus status; // Trạng thái phê duyệt
 
-	@Enumerated(EnumType.STRING)
-	private ApprovalStatus status;
+    @ManyToOne
+    @JoinColumn(name = "accept_id", nullable = false) // Người phê duyệt
+    private User acceptBy;
 
-	private LocalDateTime approvalDate;
+    @ManyToOne
+    @JoinColumn(name = "job_id", nullable = false) // Khóa ngoại liên kết với job
+    private Job job;
+
+    // Getters & Setters
 }

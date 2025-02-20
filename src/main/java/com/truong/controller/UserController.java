@@ -58,7 +58,7 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestBody User user) {
-		userService.login(user.getUserName(), user.getPassword());
+		userService.login(user.getUsername(), user.getPassword());
 		return ResponseEntity.ok("login successful");
 	}
 	

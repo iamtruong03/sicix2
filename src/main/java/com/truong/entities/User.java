@@ -1,30 +1,36 @@
 package com.truong.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.truong.entities.Department;
 
 import jakarta.persistence.*;
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String userName;
-	private String fullName;
-	private String address;
-	private String password;
+    @Column(name = "address")
+    private String address;
 
-//	@ManyToOne
-//	@JoinColumn(name = "department_id")
-//	@JsonBackReference
-	@ManyToOne
-	@JoinColumn(name = "department_id")
-	@JsonIgnore
-	private Department department;
+    @Column(name = "fullname", nullable = false)
+    private String fullName;
+
+    @Column(name = "username", unique = true, nullable = false)
+    private String userName;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
 	public Long getId() {
 		return id;
@@ -34,12 +40,12 @@ public class User {
 		this.id = id;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getFullName() {
@@ -50,12 +56,12 @@ public class User {
 		this.fullName = fullName;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getUsername() {
+		return userName;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setUsername(String username) {
+		this.userName = username;
 	}
 
 	public String getPassword() {
@@ -74,4 +80,5 @@ public class User {
 		this.department = department;
 	}
 
+    
 }

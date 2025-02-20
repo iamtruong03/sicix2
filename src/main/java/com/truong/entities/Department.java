@@ -2,33 +2,34 @@ package com.truong.entities;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.truong.entities.Department;
 import com.truong.entities.User;
 
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "department")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "departmentId")
 public class Department {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long departmentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "department_id")
+    private Long departmentId;
 
-	@Column(nullable = false, unique = true)
-	private String nameDepartment;
+    @Column(name = "name_department", nullable = false)
+    private String nameDepartment;
 
-	@ManyToOne
-	@JoinColumn(name = "parent_id")
-	@JsonIgnore
-	private Department parentDepartment;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonIgnore
+    private Department parentDepartment;
 
-	@OneToMany(mappedBy = "parentDepartment", cascade = CascadeType.PERSIST)
-	private List<Department> subDepartments = new ArrayList<>();
-
-	@OneToMany(mappedBy = "department")
-	@JsonManagedReference
-	private List<User> users = new ArrayList<>();
+    @OneToMany(mappedBy = "parentDepartment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Department> subDepartments;
 
 	public Long getDepartmentId() {
 		return departmentId;
@@ -61,13 +62,7 @@ public class Department {
 	public void setSubDepartments(List<Department> subDepartments) {
 		this.subDepartments = subDepartments;
 	}
-
-	public List<User> getUsers() {
-		return users;
-	}
-
-	public void setUsers(List<User> users) {
-		this.users = users;
-	}
-
+    
 }
+	
+
