@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!--thay thế nội dung của thẻ hiện tại bằng nội dung của fragment có tên là "dynamic" 
+trong tệp index.html của thư mục /layout.-->
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/index :: dynamic(~{::main})}">
+<body>
+	
+	<main>
+		<section class="home-slider-area">
+			<div class="swiper-container swiper-slide-gap home-slider-container default-slider-container">
+				<div class="swiper-wrapper home-slider-wrapper slider-default">
+					<div class="swiper-slide">
+						<div class="slider-content-area" data-bg-img="assets/img/slider/slider-01.jpg">
+							<div class="slider-content">
+								<h5 class="sub-title">THE HUYNH</h5>
+								<h2 class="title">ĐẶC BIỆT</h2>
+								<h4>Unknow</h4>
+								<p></p>
+								<a class="btn-slider" href="/shop">Xem ngay</a>
+							</div>
+						</div>
+					</div>
+					<div class="swiper-slide">
+						<div class="slider-content-area" data-bg-img="assets/img/slider/slider-02.jpg">
+							<div class="slider-content">
+								<h5 class="sub-title">THE HUYNH</h5>
+								<h2 class="title"></h2>
+								<h4>Unknow</h4>
+								<p></p>
+								<a class="btn-slider" href="/shop">Xem ngay</a>
+							</div>
+						</div>
+					</div>
+					<div class="swiper-slide">
+						<div class="slider-content-area" data-bg-img="assets/img/slider/slider-03.jpg">
+							<div class="slider-content">
+								<h5 class="sub-title">THE HUYNH</h5>
+								<h2 class="title"></h2>
+								<h4></h4>
+								<p></p>
+								<a class="btn-slider" href="/shop">Xem ngay</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="swiper-button-next">
+					<i class="zmdi zmdi-chevron-right"></i>
+				</div>
+				<div class="swiper-button-prev">
+					<i class="zmdi zmdi-chevron-left"></i>
+				</div>
+			</div>
+		</section>
+
+		<div class="container">
+			<section class="product-area">
+				<div class="container product-pb" data-padding-bottom="25">
+					<div class="row">
+						<div class="col-12">
+							<div class="row">
+								<div class="col-lg-7 m-auto">
+									<div class="section-title text-center">
+										<h2 class="title">Gian Hàng</h2>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-3" th:each="p:${items}">
+									<div class="product-item">
+										<div class="inner-content">
+											<div class="product-thumb">
+												<a th:href="@{|/product/detail/${p.id}|}">
+													<img class="product-item m-auto d-block" th:src="@{|/assets/images/${p.image}|}"
+														th:title="${p.name}">
+												</a>
+												<div class="product-action">
+													<div class="addto-wrap">
+														<a class="add-wishlist" 
+															th:attr="ng-click=@{|wishlist.add(${p.id})|}">
+															<i class="zmdi zmdi-favorite-outline zmdi-hc-fw icon"></i>
+														</a>
+														<a class="add-cart" 
+															th:attr="ng-click=@{|cart.add(${p.id})|}">
+															<i class="zmdi zmdi-shopping-cart-plus icon"></i>
+														</a>
+													</div>
+												</div>
+											</div>
+											<div class="product-desc">
+												<div class="product-info">
+													<h4 class="title">
+														<a th:href="@{|/product/detail/${p.id}|}">[(${p.name})]</a>
+													</h4>
+													<div class="prices">
+														<span class="price">[[${#numbers.formatDecimal(p.price,0,'COMMA',2,'POINT')}]] VNĐ</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<div class="row">
+				<div class="col-12">
+					<div class="pagination-content-wrap border-bottom">
+						<nav class="pagination-nav">
+							<ul class="pagination justify-content-center">
+								<li>
+									<button class="prev" ng-click="pager.first()">First</button>
+								</li>
+								<li>
+									<button class="prev" ng-click="pager.prev()">
+										<i class="fa fa-chevron-left"></i>
+									</button>
+								</li>
+								<li>
+									<a class="active">{{pager.page+1}} / {{pager.count?pager.count:'1'}}</a>
+								</li>
+								<li>
+									<button class="next" ng-click="pager.next()">
+										<i class="fa fa-chevron-right"></i>
+									</button>
+								</li>
+								<li>
+									<button class="next" ng-click="pager.last()">Last</button>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+
+			<section class="feature-area">
+				<div class="container pb-1">
+					<div class="row">
+						<div class="col-md-6 col-lg-4">
+							<div class="feature-icon-box">
+								<div class="inner-content">
+									<div class="icon-box">
+										<i class="icon zmdi zmdi-pin"></i>
+									</div>
+									<div class="content">
+										<h5 class="title">Miễn phí giao hàng nội tỉnh</h5>
+										<p>Miễn phí giao hàng đơn trên 500 nghìn đồng</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-lg-4">
+							<div class="feature-icon-box">
+								<div class="inner-content">
+									<div class="icon-box">
+										<i class="icon zmdi zmdi-headset"></i>
+									</div>
+									<div class="content">
+										<h5 class="title">Hỗ trợ 24/7</h5>
+										<p>Liên hệ với chúng tôi 24 giờ một ngày.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-lg-4">
+							<div class="feature-icon-box">
+								<div class="inner-content mb-0">
+									<div class="icon-box">
+										<i class="icon zmdi zmdi-card"></i>
+									</div>
+									<div class="content">
+										<h5 class="title">Thanh toán an toàn 100%</h5>
+										<p>Thanh toán của bạn được đảm bảo an toàn.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<hr>
+		</div>
+		<!--thay thế nội dung bằng nội dung của fragment có tên là "dynamic" 
+trong tệp index.html của thư mục /layout.-->
+	</main>
+</body>
+</html>

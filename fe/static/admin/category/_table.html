@@ -1,0 +1,30 @@
+<div class="row mx-0 bg-white" ng-if="items">
+	<div class="col-12 py-3">
+		<table id="datatable-buttons" class="table table-collapse table-bordered dt-responsive">
+			<thead class="bg-warning">
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>#</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in items">
+					<td class="align-center">{{item.id}}</td>
+					<td class="align-center">{{item.name}}</td>
+					<td class="align-center">
+						<div class="btn-group btn-group-xs">
+							<button ng-click="edit(item)" class="btn btn-icon">
+								<i class="fa fa-xs fa-pen"></i>
+							</button>
+							<button ng-click="delete(item)" class="btn btn-danger">
+								<i class="fa fa-xs fa-times"></i>
+							</button>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script src="/assetss/js/init.js"></script>

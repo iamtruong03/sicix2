@@ -1,0 +1,49 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    password: 123456789@
+    url: jdbc:sqlserver://localhost:1433;databaseName=demo2;encrypt=true;trustServerCertificate=true;
+    username: root
+  devtools:
+    livereload:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.SQLServer2008Dialect
+    open-in-view: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServer2008Dialect
+    show-sql: false
+  mail:
+    host: smtp.gmail.com
+    password: drydqssinbkzpjsr
+    port: 587
+    properties:
+      mail:
+        smpt:
+          auth: true
+        smtp:
+          starttls:
+            enable: true
+    username: huynhdtps23881@fpt.edu.vn
+  profiles:
+    active: dev
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            client-id: 1050501362620628
+            client-secret: 225bb03830263921ae15aa7a1647a0d6
+          google:
+            client-id: 14152977969-lqid1rgojd63njtsd6sg6sv4iftjo8u5.apps.googleusercontent.com
+            client-secret: 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
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 50MB

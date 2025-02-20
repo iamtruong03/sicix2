@@ -1,0 +1,195 @@
+<header class="header-area header-default sticky-header" xmlns:th="http://www.thymeleaf.org">
+	<div class="container">
+		<div class="row align-items-center">
+			<div class="col-4 col-sm-4 col-lg-3">
+				<div class="header-logo-area">
+					<a th:href="@{/}">
+						<img style="" class="logo-main" src="assets/img/logo.png" alt="Logo" />
+					</a>
+				</div>
+			</div>
+			<div class="col-sm-4 col-lg-6 d-none d-lg-block">
+				<div class="header-navigation-area">
+					<ul class="main-menu nav position-relative">
+						<li>
+							<a href="/" class="nav-link" th:text="#{nav.home}">Trang chủ</a>
+						</li>
+						<li class="has-submenu">
+							<a class="nav-link" th:text="#{nav.cate}">Danh mục</a>
+							<ul class="submenu-nav">
+								<li th:each="c:${cates}">
+									<a th:href="@{|/index?cid=${c.id}|}">[[${c.name}]]</a>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<a class="nav-link" th:text="#{nav.contact}" href="contact">Liên hệ</a>
+						</li>
+						<li>
+							<a class="nav-link" th:text="#{nav.about}" href="about">Giới thiệu</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="col-sm-8 col-lg-3 d-none d-sm-block text-end">
+				<div class="header-action-area">
+					<ul class="header-action">
+						<li class="navs-menu">
+							<a class="action-item">
+								<i class="zmdi zmdi-search icon"></i>
+							</a>
+							<ul class="navs-dropdown">
+								<li class="account">
+									<div class="search-form-wrap">
+										<div class="search-form">
+											<form action="#">
+												<div class="form-group">
+													<input class="form-control" type="search"
+														placeholder="Tìm trong cửa hàng">
+													<button class="btn-search">Tìm kiếm</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</li>
+
+						<li class="mini-cart">
+							<a class="action-item">
+								<i class="zmdi zmdi-favorite-outline icon"></i>
+								<span class="cart-quantity">{{wishlist.count}}</span>
+							</a>
+							<div class="mini-cart-dropdown">
+								<div class="cart-item" ng-repeat="item in wishlist.items">
+									<div class="thumb">
+										<img class="w-100" src="/assets/images/{{item.image}}">
+									</div>
+									<div class="content">
+										<h5 class="title">{{item.name}}</h5>
+
+										<span class="product-price">${{item.price | number:2}}</span>
+										<a class="cart-trash" ng-click="wishlist.remove(item.id)">
+											<i class="fa fa-trash"></i>
+										</a>
+									</div>
+								</div>
+								<div class="cart-btn">
+									<a th:href="@{/wishlist/view}">Xem danh sách yêu thích</a>
+								</div>
+							</div>
+						</li>
+						<li class="mini-cart">
+							<a class="action-item">
+								<i class="zmdi zmdi-shopping-cart-plus icon"></i>
+								<span class="cart-quantity">{{cart.count}}</span>
+							</a>
+							<div class="mini-cart-dropdown">
+								<div class="cart-item" ng-repeat="item in cart.items">
+									<div class="thumb">
+										<img class="w-100" src="/assets/images/{{item.image}}">
+									</div>
+									<div class="content">
+										<h5 class="title">{{item.name}}</h5>
+										<span class="product-quantity">x{{item.qty}}</span>
+										<span class="product-price">${{item.price | number:2}}</span>
+										<a class="cart-trash" ng-click="cart.remove(item.id)">
+											<i class="fa fa-trash"></i>
+										</a>
+									</div>
+								</div>
+								<div class="cart-total-money">
+									<h5>
+										Tổng cộng:
+										<span class="money">{{cart.amount | number:2}} VNĐ</span>
+									</h5>
+								</div>
+								<div class="cart-btn">
+									<a th:href="@{/cart/view}">Xem giỏ hàng</a>
+									<a th:href="@{/cart/checkout}">Thanh toán</a>
+								</div>
+							</div>
+						</li>
+						<li class="navs-menu">
+							<a class="action-item">
+								<i class="zmdi zmdi-lock-outline icon"></i>
+							</a>
+							<ul class="navs-dropdown">
+								<li class="account">
+									<ul>
+										<th:block th:unless="${#request.remoteUser}">
+											<li>
+												<a th:href="@{/auth/login/form}">Đăng nhập</a>
+											</li>
+											<li>
+												<a th:href="@{/auth/register}">Đăng kí</a>
+											</li>
+											<li>
+												<a th:href="@{/auth/forgot-password}">Quên mật khẩu?</a>
+											</li>
+										</th:block>
+										<th:block th:if="${#request.remoteUser}">
+											<li
+												th:if="${#request.isUserInRole('Dire') or #request.isUserInRole('STAF')}">
+												<a th:href="@{/admin}">Quản lý</a>
+											</li>
+											<li>
+												<a th:href="@{/order/list}">Đơn đặt hàng</a>
+											</li>
+											<li>
+												<a th:href="@{/auth/change-password}">Đổi mật khẩu</a>
+											</li>
+											<li>
+												<a th:href="@{/auth/logout}">Đăng xuất</a>
+											</li>
+										</th:block>
+									</ul>
+								</li>
+							</ul>
+						</li>
+						<li class="navs-menu">
+							<a class="action-item">
+								<i class="zmdi zmdi-globe-alt"></i>
+							</a>
+							<ul class="navs-dropdown">
+								<li class="account">
+									<ul>
+										<span>
+											<a style="color: black;" class="dropdown-item" href="/?lang=vi" th:text="#{nav.vi}">Vietnamese</a>
+										</span>
+										<span>
+											<a style="color: black;" class="dropdown-item" href="/?lang=en" th:text="#{nav.en}">English</a>
+										</span>
+									</ul>
+								</li>
+							</ul>
+						</li>
+
+						<li class="navs-menu">
+							<a class="action-item" id="mode-toggle">
+								<i class="zmdi zmdi-sun"></i>
+							</a>
+						</li>
+					</ul>
+				</div>
+				
+			</div>
+			
+			<div class="col-6 col-sm-1 d-block d-lg-none text-end">
+				<button class="btn-menu" type="button">
+					<i class="zmdi zmdi-menu"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</header>
+<script > 
+
+const modeToggle = document.getElementById("mode-toggle");
+const body = document.body;
+
+modeToggle.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+});
+</script>
