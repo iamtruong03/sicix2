@@ -1,7 +1,9 @@
 package com.truong.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.truong.exception.JobStatus;
 
 import jakarta.persistence.*;
@@ -15,20 +17,20 @@ public class Job {
 
 	private String jobName;
 
-	// Người tạo
 	@ManyToOne
-	@JoinColumn(name = "created_id", referencedColumnName = "id")
+	@JoinColumn(name = "created_id")
+	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
 	private User createdId;
 
-	// Người thực hiện
 	@ManyToOne
-	@JoinColumn(name = "executed_id", referencedColumnName = "id")
+	@JoinColumn(name = "executed_id")
+	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
 	private User executedId;
 
 	@Enumerated(EnumType.STRING)
 	private JobStatus status; // Trạng thái công việc
 
-	private LocalDateTime deadline; // Hạn chót công việc
+	private LocalDate deadline; // Hạn chót công việc
 
 	public Long getJobId() {
 		return jobId;
@@ -70,11 +72,11 @@ public class Job {
 		this.status = status;
 	}
 
-	public LocalDateTime getDeadline() {
+	public LocalDate getDeadline() {
 		return deadline;
 	}
 
-	public void setDeadline(LocalDateTime deadline) {
+	public void setDeadline(LocalDate deadline) {
 		this.deadline = deadline;
 	}
 

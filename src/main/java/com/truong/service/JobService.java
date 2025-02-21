@@ -20,4 +20,6 @@ public class JobService {
 	public List<Job> getAllJobs(){
 		return jobReponsitory.findAll();
 		}
+	
+	
 }

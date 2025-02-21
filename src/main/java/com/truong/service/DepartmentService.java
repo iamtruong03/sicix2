@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.truong.entities.Department;
+import com.truong.entities.User;
 import com.truong.repository.DepartmentReponsitory;
 
 @Service
@@ -22,6 +23,14 @@ public class DepartmentService {
 		}
 		return departmentReponsitory.save(department);
 	}
+	
+	// xem user theo phòng ban con
+	public List<User> getUsersByDepartment(Long departmentId) {
+	    return departmentReponsitory.findByDepartmentId(departmentId)
+	            .map(Department::getUsers)
+	            .orElse(Collections.emptyList());
+	}
+
 
 	// Lấy phòng ban cha
 	public Department getParent(Long departmentId) {

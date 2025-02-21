@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.truong.entities.Department;
+import com.truong.entities.User;
 import com.truong.service.DepartmentService;
 import com.truong.service.UserService;
 
@@ -20,6 +21,13 @@ public class DepartmentController {
 	
 //	@GetMapping
 //	public DepartmentEn
+	
+	@GetMapping("/{departmentId}/users")
+	public ResponseEntity<List<User>> getUsersByDepartment(@PathVariable Long departmentId) {
+	    List<User> users = departmentService.getUsersByDepartment(departmentId);
+	    return ResponseEntity.ok(users);
+	}
+
 	
 	 // API lấy phòng ban cha
     @GetMapping("/{departmentId}/parent")

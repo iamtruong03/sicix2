@@ -1,6 +1,8 @@
 package com.truong.entities;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.truong.exception.ApprovalStatus;
@@ -12,7 +14,7 @@ public class JobApproval {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime approvalDate; // Ngày phê duyệt
+    private LocalDate approvalDate; // Ngày phê duyệt
 
     @Enumerated(EnumType.STRING)
     private ApprovalStatus status; // Trạng thái phê duyệt
