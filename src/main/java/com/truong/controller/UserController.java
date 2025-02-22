@@ -1,5 +1,8 @@
 package com.truong.controller;
 
+import com.truong.entities.Job;
+import com.truong.service.JobService;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.truong.entities.User;
@@ -21,51 +25,29 @@ import com.truong.service.UserService;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
-	private UserService userService;
-	
-	
-	@GetMapping
-	public ResponseEntity<List<User>> getAllUsers() {
-		List<User> users = userService.getAllUsers();
-		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
+  @Autowired
+  private UserService userService;
+  @Autowired
+  private JobService jobService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
-		User user = userService.getUserById(id);
-		return new ResponseEntity<>(user, HttpStatus.OK);
-	}
+  @PostMapping("/login")
+  public ResponseEntity<String> login(@RequestBody User user) {
+    userService.login(user.getUsername(), user.getPassword());
+    return ResponseEntity.ok("login successful");
+  }
 
-	@PostMapping
-	public ResponseEntity<User> createUser(@RequestBody User user) {
-		User createUsers = userService.createUser(user);
-		return new ResponseEntity<>(createUsers, HttpStatus.CREATED);
-	}
+  @PostMapping("/createJob")
+  public ResponseEntity<?> createJob(@RequestParam String jobName,
+      @RequestParam LocalDate deadline,
+      @RequestParam Long createdUserId,
+      @RequestParam Long executedUserId) {
+    try {
+      Job job = jobService.createJob(jobName, deadline, createdUserId, executedUserId);
+      return ResponseEntity.ok(job);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user){
-		user.setId(id);
-		User updateUsers = userService.updateUser(user);
-		return new ResponseEntity<>(updateUsers, HttpStatus.OK);
-	}
-	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteUser(@PathVariable("id") Long id){
-		userService.deleteUser(id);
-		return ResponseEntity.ok("Delete successfully");
-	}
 
-	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody User user) {
-		userService.login(user.getUsername(), user.getPassword());
-		return ResponseEntity.ok("login successful");
-	}
-	
-	@PutMapping("/{id}/change-password")
-	public ResponseEntity<String> changePassword(@PathVariable("id") Long id, @RequestBody User user ){
-		userService.changePassword(id, user.getPassword());
-		return ResponseEntity.ok("change password successful");
-	}
-
+  }
 }

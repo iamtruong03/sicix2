@@ -15,6 +15,7 @@ public interface UserReponsitory extends JpaRepository<User, Long> {
 
 	boolean existsByUserName(String username);
 
+
 //	Optional<User> findByUserName(String username);
 //
 //	List<User> findByDepartment(Department department);

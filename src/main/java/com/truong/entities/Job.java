@@ -11,73 +11,88 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "job")
 public class Job {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long jobId;
 
-	private String jobName;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long jobId;
 
-	@ManyToOne
-	@JoinColumn(name = "created_id")
-	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
-	private User createdId;
+  private String jobName;
 
-	@ManyToOne
-	@JoinColumn(name = "executed_id")
-	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
-	private User executedId;
+  @ManyToOne
+  @JoinColumn(name = "created_id")
+  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
+  private User createdId;
 
-	@Enumerated(EnumType.STRING)
-	private JobStatus status; // Trạng thái công việc
+  @ManyToOne
+  @JoinColumn(name = "executed_id")
+  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
+  private User executedId;
 
-	private LocalDate deadline; // Hạn chót công việc
+  @ManyToOne
+  @JoinColumn(name = "approver_id")
+  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
+  private User approverId;
 
-	public Long getJobId() {
-		return jobId;
-	}
+  @Enumerated(EnumType.STRING)
+  private JobStatus status; // Trạng thái công việc
 
-	public void setJobId(Long jobId) {
-		this.jobId = jobId;
-	}
+  private LocalDate deadline; // Hạn chót công việc
 
-	public String getJobName() {
-		return jobName;
-	}
+  public Long getJobId() {
+    return jobId;
+  }
 
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
-	}
+  public void setJobId(Long jobId) {
+    this.jobId = jobId;
+  }
 
-	public User getCreatedId() {
-		return createdId;
-	}
+  public String getJobName() {
+    return jobName;
+  }
 
-	public void setCreatedId(User createdId) {
-		this.createdId = createdId;
-	}
+  public void setJobName(String jobName) {
+    this.jobName = jobName;
+  }
 
-	public User getExecutedId() {
-		return executedId;
-	}
+  public User getCreatedId() {
+    return createdId;
+  }
 
-	public void setExecutedId(User executedId) {
-		this.executedId = executedId;
-	}
+  public void setCreatedId(User createdId) {
+    this.createdId = createdId;
+  }
 
-	public JobStatus getStatus() {
-		return status;
-	}
+  public User getExecutedId() {
+    return executedId;
+  }
 
-	public void setStatus(JobStatus status) {
-		this.status = status;
-	}
 
-	public LocalDate getDeadline() {
-		return deadline;
-	}
+  public User getApproverId() {
+    return approverId;
+  }
 
-	public void setDeadline(LocalDate deadline) {
-		this.deadline = deadline;
-	}
+  public void setApproverId(User approverId) {
+    this.approverId = approverId;
+  }
+
+  public void setExecutedId(User executedId) {
+    this.executedId = executedId;
+  }
+
+  public JobStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(JobStatus status) {
+    this.status = status;
+  }
+
+  public LocalDate getDeadline() {
+    return deadline;
+  }
+
+  public void setDeadline(LocalDate deadline) {
+    this.deadline = deadline;
+  }
 
 }

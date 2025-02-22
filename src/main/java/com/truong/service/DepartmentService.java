@@ -16,13 +16,6 @@ import com.truong.repository.DepartmentReponsitory;
 public class DepartmentService {
 	@Autowired
 	private DepartmentReponsitory departmentReponsitory;
-
-	public Department createDepartment(Department department) {
-		if (department.getDepartmentId() != null) {
-
-		}
-		return departmentReponsitory.save(department);
-	}
 	
 	// xem user theo phòng ban con
 	public List<User> getUsersByDepartment(Long departmentId) {

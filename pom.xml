@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.truong</groupId>
-	<artifactId>test1902</artifactId>
+	<artifactId>Project-sicix-01</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>test1902</name>
 	<description>1902test Truong</description>

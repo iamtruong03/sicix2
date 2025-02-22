@@ -13,6 +13,8 @@ import com.truong.entities.Department;
 @Repository
 public interface DepartmentReponsitory extends JpaRepository<Department, Long> {
     Optional<Department> findByDepartmentId(Long departmentId);
+
+    List<Department> findSubDepartmentByDepartmentId(Long departmentId);
     List<Department> findByParentDepartment(Department parentDepartment);
     boolean existsByNameDepartment(String namedepartment);
 }

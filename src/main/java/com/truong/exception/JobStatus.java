@@ -1,7 +1,9 @@
 package com.truong.exception;
 
 public enum JobStatus {
-    IN_PROGRESS,      // Đang thực hiện
-    COMPLETED,        // Đã hoàn thành
-    OVERDUE          // Quá hạn
+    WAITING, // Chờ duyệt
+    REJECTED, // Từ chối
+    IN_PROGRESS, // Đang thực hiện
+    COMPLETED, // Hoàn thành
+    OVERDUE // Quá hạn
 }
