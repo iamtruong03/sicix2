@@ -4,8 +4,10 @@ import com.truong.exception.JobStatus;
 import com.truong.repository.JobReponsitory;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ public class UserService {
 
 		return true;
 	}
+	
 
 
 	// danh sach user duoi cap co the nhan job

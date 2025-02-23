@@ -8,6 +8,7 @@ import com.truong.service.JobService;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,7 @@ public class UserController {
 		return ResponseEntity.ok(users);
 	}
 
+	// tạo việc
 	@PostMapping("/createJob")
 	public ResponseEntity<?> createJob(@RequestParam String jobName, @RequestParam LocalDate deadline,
 			@RequestParam Long createdUserId, @RequestParam Long executedUserId) {
@@ -71,19 +73,43 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/executed-jobs")
-	public ResponseEntity<?> getJobsByExecutedId(@RequestParam Long approverId, @RequestParam Long executedId,
-			@RequestParam(required = false) JobStatus status) {
+	// tạo yêu cầu
+	@PostMapping("/createApproveJob")
+	public ResponseEntity<?> createJob(@RequestParam Long id, @RequestParam String jobName,
+			@RequestParam LocalDate deadline) {
 		try {
-			List<Job> jobs = jobService.getJobsByExecutedId(approverId, executedId, status);
+			Job job = jobService.createApproveJob(id, jobName, deadline);
+			return ResponseEntity.ok(job);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	// xem list job
+	@GetMapping("/my-jobs")
+	public ResponseEntity<?> getJobsByExecutedId(@RequestParam Long executedId) {
+		try {
+			List<Job> jobs = jobService.getJobsByExecutedId(executedId);
 			return ResponseEntity.ok(jobs);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+
+	// xem list job của nhân viên
+	@GetMapping("/subordinates-jobs")
+	public ResponseEntity<?> getJobsOfSubordinates(@RequestParam Long approverId) {
+		try {
+			List<Job> jobs = jobService.getJobsOfSubordinates(approverId);
+			return ResponseEntity.ok(jobs);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	// hoàn thành job
 	@PutMapping("/update-status")
-	public ResponseEntity<?> updateJobStatus(@RequestParam Long jobId,
-			@RequestParam Long userId,
+	public ResponseEntity<?> updateJobStatus(@RequestParam Long jobId, @RequestParam Long userId,
 			@RequestParam JobStatus newStatus) {
 		try {
 			Job updatedJob = jobService.updateJobStatus(jobId, userId, newStatus);
@@ -92,5 +118,33 @@ public class UserController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+
+	// duyệt yêu cầu job
+	@PutMapping("/approveJob")
+	public ResponseEntity<?> approveJob(@RequestParam Long approverId, @RequestParam Long jobId) {
+		try {
+			Job job = jobService.approveJob(approverId, jobId);
+			return ResponseEntity.ok(job);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	// từ chối
+	@PutMapping("/rejectApproveJob")
+	public ResponseEntity<?> rejectJob(@RequestParam Long approverId, @RequestParam Long jobId) {
+		try {
+			Job job = jobService.rejectJob(approverId, jobId);
+			return ResponseEntity.ok(job);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	@GetMapping("/job-stats/{approverId}")
+	public ResponseEntity<List<Map<String, Object>>> getJobStats(@PathVariable Long approverId) {
+	    List<Map<String, Object>> jobStats = jobService.getJobStatsForSubordinates(approverId);
+	    return ResponseEntity.ok(jobStats);
+	}
+
 
 }
