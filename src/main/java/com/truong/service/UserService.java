@@ -29,21 +29,29 @@ public class UserService {
 	@Autowired
 	private DepartmentReponsitory departmentReponsitory;
 
+//	public User findByUsernameAndPassword(String userName, String password) {
+//		Optional<User> user = userReponsitory.findByUsernameAndPassword(userName, password);
+//		return user.orElse(null); // Trả về null nếu không tìm thấy user
+//	}
+
 	public Boolean login(String userName, String password) {
-		if(userName == null) {
-			throw new AppException(ErrorCode.INVALID_USER);
-		}
-		if (password == null || password.isEmpty()) {
-			throw new AppException(ErrorCode.INVALID_PASSWORD);
-		}
-		
-		User user = userReponsitory.findByUserName(userName)
-				.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (userName == null) {
+            throw new AppException(ErrorCode.INVALID_USER);
+        }
+        if (password == null || password.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
+        }
 
-		return true;
-	}
-	
+        User user = userReponsitory.findByUserName(userName)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
+        // So sánh mật khẩu thuần (Không mã hóa)
+        if (!password.equals(user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        return true;
+    }
 
 	// danh sach user duoi cap co the nhan job
 //	public List<User> getAllowedExecutors() {

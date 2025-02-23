@@ -18,7 +18,10 @@ public interface JobReponsitory extends JpaRepository<Job, Long>{
   List<Job> findByExecutedId(User executedId);
   @Query("SELECT j FROM Job j WHERE j.approverId = :approver OR j.executedId IN :subordinateUsers")
   List<Job> findJobsOfSubordinates(@Param("approver") User approver, @Param("subordinateUsers") List<User> subordinateUsers);
-  @Query("SELECT j.status, COUNT(j) FROM Job j WHERE j.executedId IN :subordinateUsers GROUP BY j.status")
-  List<Object[]> countJobsByStatusForSubordinates(@Param("subordinateUsers") List<User> subordinateUsers);
+  @Query("SELECT j.status, COUNT(j) FROM Job j " +
+	       "WHERE j.approverId = :approver OR j.executedId IN :subordinateUsers " +
+	       "GROUP BY j.status")
+	List<Object[]> countJobsByStatusForSubordinates(@Param("approver") User approver, 
+	                                                @Param("subordinateUsers") List<User> subordinateUsers);
 
 }

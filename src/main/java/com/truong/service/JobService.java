@@ -194,25 +194,27 @@ public class JobService {
 	}
 	
 	// thống kê
-	public List<Map<String, Object>> getJobStatsForSubordinates(Long approverId) {
-	    // Lấy danh sách nhân viên cấp dưới của approverId
-	    List<User> subordinates = departmentService.getUsersByDepartment(approverId);
+	public Map<JobStatus, Long> countJobsByStatusForSubordinates(Long approverId) {
+        // Lấy thông tin của approver (người duyệt)
+        User approver = userReponsitory.findById(approverId)
+                .orElseThrow(() -> new RuntimeException("Người duyệt không tồn tại!"));
 
-	    if (subordinates.isEmpty()) {
-	        return List.of(); // Không có cấp dưới => Trả về danh sách rỗng
-	    }
+        // Lấy danh sách cấp dưới
+        List<User> subordinates = departmentService.getUsersByDepartment(approver.getDepartment().getDepartmentId());
 
-	    // Lấy dữ liệu từ repository
-	    List<Object[]> results = jobReponsitory.countJobsByStatusForSubordinates(subordinates);
+        // Gọi repository để lấy số lượng Job theo trạng thái
+        List<Object[]> result = jobReponsitory.countJobsByStatusForSubordinates(approver, subordinates);
 
-	    // Chuyển đổi dữ liệu sang format phù hợp cho biểu đồ
-	    return results.stream().map(row -> {
-	        Map<String, Object> data = new HashMap<>();
-	        data.put("name", ((JobStatus) row[0]).name());
-	        data.put("value", ((Long) row[1]).intValue());
-	        return data;
-	    }).collect(Collectors.toList());
-	}
+        // Chuyển đổi danh sách Object[] thành Map<JobStatus, Long>
+        Map<JobStatus, Long> jobCountMap = new HashMap<>();
+        for (Object[] row : result) {
+            JobStatus status = (JobStatus) row[0];
+            Long count = (Long) row[1];
+            jobCountMap.put(status, count);
+        }
+
+        return jobCountMap;
+    }
 
 
 }

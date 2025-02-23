@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Công Việc</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>Hệ Thống Quản Lý Công Việc</h1>
+
+    <h2>🔑 Đăng Nhập</h2>
+    <input type="text" id="username" placeholder="Nhập tên đăng nhập">
+    <input type="password" id="password" placeholder="Nhập mật khẩu">
+    <button onclick="login()">Đăng Nhập</button>
+    <p id="loginStatus"></p>
+
+    <h2>✅ Thông Tin Người Dùng</h2>
+    <p id="userInfo"></p>
+
+    <h2>📌 Tạo Công Việc</h2>
+    <input type="text" id="jobName" placeholder="Tên công việc">
+    <input type="date" id="deadline">
+    <button onclick="createJob()">Tạo Job</button>
+    <p id="jobStatus"></p>
+
+    <h2>📌 Danh Sách Công Việc Của Tôi</h2>
+    <button onclick="getMyJobs()">Xem Công Việc</button>
+    <ul id="myJobsList"></ul>
+
+    <h2>📌 Cập Nhật Trạng Thái Job</h2>
+    <input type="number" id="updateJobId" placeholder="ID Job">
+    <select id="updateStatus">
+        <option value="IN_PROGRESS">Đang thực hiện</option>
+        <option value="COMPLETED">Hoàn thành</option>
+        <option value="OVERDUE">Quá hạn</option>
+    </select>
+    <button onclick="updateJobStatus()">Cập Nhật</button>
+
+    <h2>📊 Biểu Đồ Công Việc</h2>
+    <canvas id="jobChart"></canvas>
+    <button onclick="getJobStats()">Xem Thống Kê</button>
+
+    <script>
+        const API_URL = "http://localhost:8080/user";
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            const response = await fetch(`${API_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const user = await response.json(); // Trả về userId, username
+                localStorage.setItem("userId", user.userId); // Lưu userId vào trình duyệt
+                localStorage.setItem("username", user.username);
+                document.getElementById("loginStatus").innerText = `Đăng nhập thành công! ID: ${user.userId}`;
+                document.getElementById("userInfo").innerText = `Người dùng: ${user.username} (ID: ${user.userId})`;
+            } else {
+                document.getElementById("loginStatus").innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+            }
+        }
+
+        async function createJob() {
+            const jobName = document.getElementById("jobName").value;
+            const deadline = document.getElementById("deadline").value;
+            const userId = localStorage.getItem("userId");
+
+            if (!userId) {
+                alert("Bạn cần đăng nhập trước!");
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/createJob?jobName=${jobName}&deadline=${deadline}&createdUserId=${userId}&executedUserId=${userId}`, {
+                method: "POST"
+            });
+
+            const data = await response.json();
+            document.getElementById("jobStatus").innerText = data.jobId ? `Tạo Job thành công! ID: ${data.jobId}` : `Lỗi: ${data}`;
+        }
+
+        async function getMyJobs() {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Bạn cần đăng nhập trước!");
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/my-jobs?executedId=${userId}`);
+            const jobs = await response.json();
+
+            const list = document.getElementById("myJobsList");
+            list.innerHTML = "";
+            jobs.forEach(job => {
+                const li = document.createElement("li");
+                li.textContent = `${job.jobName} - ${job.status}`;
+                list.appendChild(li);
+            });
+        }
+
+        async function updateJobStatus() {
+            const jobId = document.getElementById("updateJobId").value;
+            const userId = localStorage.getItem("userId");
+            const newStatus = document.getElementById("updateStatus").value;
+
+            if (!userId) {
+                alert("Bạn cần đăng nhập trước!");
+                return;
+            }
+
+            await fetch(`${API_URL}/update-status?jobId=${jobId}&userId=${userId}&newStatus=${newStatus}`, { method: "PUT" });
+            alert("Cập nhật thành công!");
+        }
+
+        async function getJobStats() {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Bạn cần đăng nhập trước!");
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/count-by-status?approverId=${userId}`);
+            const stats = await response.json();
+
+            const labels = Object.keys(stats);
+            const data = Object.values(stats);
+
+            new Chart(document.getElementById("jobChart"), {
+                type: "pie",
+                data: {
+                    labels,
+                    datasets: [{ data, backgroundColor: ["red", "blue", "green", "orange", "purple"] }]
+                }
+            });
+        }
+
+        // Hiển thị thông tin đăng nhập sau khi tải lại trang
+        window.onload = function() {
+            const userId = localStorage.getItem("userId");
+            const username = localStorage.getItem("username");
+            if (userId) {
+                document.getElementById("loginStatus").innerText = `Đăng nhập thành công! ID: ${userId}`;
+                document.getElementById("userInfo").innerText = `Người dùng: ${username} (ID: ${userId})`;
+            }
+        };
+    </script>
+
+</body>
+</html>

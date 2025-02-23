@@ -40,10 +40,19 @@ public class UserController {
 	private UserReponsitory userReponsitory;
 
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody User user) {
-		userService.login(user.getUsername(), user.getPassword());
-		return ResponseEntity.ok("login successful");
-	}
+    public ResponseEntity<?> login(
+            @RequestParam String userName,
+            @RequestParam String password) {
+        
+        boolean isAuthenticated = userService.login(userName, password);
+        
+        if (isAuthenticated) {
+            return ResponseEntity.ok("Login successful");
+        } else {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+    }
+
 
 	@GetMapping("/sub-department/{userId}")
 	public ResponseEntity<List<User>> getUsersInSubDepartments(@PathVariable Long userId) {
@@ -140,11 +149,10 @@ public class UserController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	@GetMapping("/job-stats/{approverId}")
-	public ResponseEntity<List<Map<String, Object>>> getJobStats(@PathVariable Long approverId) {
-	    List<Map<String, Object>> jobStats = jobService.getJobStatsForSubordinates(approverId);
-	    return ResponseEntity.ok(jobStats);
-	}
-
+	@GetMapping("/count-by-status")
+    public ResponseEntity<Map<JobStatus, Long>> getJobStatusCount(@RequestParam Long approverId) {
+        Map<JobStatus, Long> jobStatusCount = jobService.countJobsByStatusForSubordinates(approverId);
+        return ResponseEntity.ok(jobStatusCount);
+    }
 
 }
