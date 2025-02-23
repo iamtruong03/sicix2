@@ -15,6 +15,8 @@ public interface UserReponsitory extends JpaRepository<User, Long> {
 //	Optional<User> findByUsernameAndPassword(String userName, String password);
 
 	Optional<User> findByUserName(String username);
+	
+	Optional<User> findByUserNameAndPassword(String userName, String password);
 
 	@Query("SELECT u FROM User u WHERE u.department.departmentId IN :departmentIds")
 	List<User> findByDepartmentIds(@Param("departmentIds") List<Long> departmentIds);

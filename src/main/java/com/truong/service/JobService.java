@@ -65,22 +65,22 @@ public class JobService {
 	}
 
 	// xem list my job
-	public List<Job> getJobsByExecutedId(Long executedId) {
+	public List<Job> getJobsByExecutedId(Long userId) {
 		// Kiểm tra executedId có hợp lệ không
-		User executedUser = userReponsitory.findById(executedId)
+		User executedUser = userReponsitory.findById(userId)
 				.orElseThrow(() -> new RuntimeException("Người thực hiện không tồn tại!"));
 
 		// Lấy danh sách công việc của bản thân (không lọc theo status)
 		return jobReponsitory.findByExecutedId(executedUser);
 	}
 
-	// xem list job của các phòng ban con
-	public List<Job> getJobsOfSubordinates(Long approverId) {
-	    // Tìm người duyệt
-	    User approver = userReponsitory.findById(approverId)
+	// xem list job của các phòng ban con	
+	public List<Job> getJobsOfSubordinates(Long userId) {
+	    // Tìm người duyệt theo userId
+	    User approver = userReponsitory.findById(userId)
 	            .orElseThrow(() -> new RuntimeException("Người duyệt không tồn tại!"));
 
-	    // Lấy danh sách nhân viên cấp dưới
+	    // Lấy danh sách nhân viên cấp dưới của phòng ban con
 	    List<User> subordinates = departmentService.getUsersByDepartment(approver.getDepartment().getDepartmentId());
 
 	    // Nếu không có nhân viên cấp dưới, trả về danh sách rỗng
@@ -88,9 +88,10 @@ public class JobService {
 	        return List.of();
 	    }
 
-	    // Gọi repository lấy danh sách công việc
+	    // Lấy danh sách công việc của cấp dưới
 	    return jobReponsitory.findJobsOfSubordinates(approver, subordinates);
 	}
+
 
 	// complete Job
 	public Job updateJobStatus(Long jobId, Long userId, JobStatus newStatus) {

@@ -3,135 +3,290 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý Công Việc</title>
+<title>Quản Lý Công Việc</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Import Chart.js -->
+<style>
+body {
+	font-family: Arial, sans-serif;
+	margin: 20px;
+	display: flex;
+}
 
-<script>
+.menu {
+	width: 200px;
+	background: #007bff;
+	padding: 10px;
+	color: white;
+	display: flex;
+	flex-direction: column;
+}
+
+.menu a {
+	color: white;
+	text-decoration: none;
+	cursor: pointer;
+	padding: 10px;
+	margin-bottom: 5px;
+	border-radius: 5px;
+	display: block;
+}
+
+.menu a:hover {
+	background-color: #0056b3;
+}
+
+.container {
+	flex-grow: 1;
+	margin-left: 20px;
+}
+
+.section {
+	margin-bottom: 20px;
+}
+
+.hidden {
+	display: none;
+}
+
+button {
+	margin-top: 10px;
+	padding: 5px;
+	cursor: pointer;
+}
+
+ul {
+	list-style: none;
+	padding: 0;
+}
+
+li {
+	margin-bottom: 5px;
+}
+
+</style>
+</head>
+<body>
+	<div class="menu">
+		<a onclick="showSection('login')">Đăng Nhập</a> <a
+			onclick="showSection('createJob')">Tạo Công Việc (Người tạo)</a> <a
+			onclick="showSection('createApproveJob')">Tạo Công Việc (Cần
+			duyệt)</a> <a onclick="showSection('myJobs')">Công Việc Của Tôi</a> <a
+			onclick="showSection('subordinatesJobs')">Công Việc Cấp Dưới</a> <a
+			onclick="showSection('updateJobStatus')">Cập Nhật Trạng Thái</a> <a
+			onclick="showSection('approveJob')">Duyệt Công Việc</a> <a
+			onclick="showSection('rejectJob')">Từ Chối Công Việc</a> <a
+			onclick="showSection('subordinates')">Nhân Viên Phòng Ban Con</a> <a
+			onclick="showSection('statistics')">Thống Kê</a>
+	</div>
+
+	<div class="container">
+		<div id="login" class="section">
+			<h2>Đăng Nhập</h2>
+			<input type="text" id="username" placeholder="Tên đăng nhập">
+			<input type="password" id="password" placeholder="Mật khẩu">
+			<button onclick="login()">Đăng nhập</button>
+		</div>
+
+		<div id="createJob" class="section hidden">
+			<h2>Tạo Công Việc (Người tạo)</h2>
+			<input type="text" id="jobNameCreate" placeholder="Tên công việc">
+			<input type="date" id="deadlineCreate"> <input type="number"
+				id="executedIdCreate" placeholder="ID người thực hiện">
+			<button onclick="createJob()">Tạo</button>
+		</div>
+
+		<div id="createApproveJob" class="section hidden">
+			<h2>Tạo Công Việc (Cần duyệt)</h2>
+			<input type="text" id="jobNameApprove" placeholder="Tên công việc">
+			<input type="date" id="deadlineApprove">
+			<button onclick="createApproveJob()">Tạo</button>
+		</div>
+
+		<div id="myJobs" class="section hidden">
+			<h2>Công Việc Của Tôi</h2>
+			<button onclick="getMyJobs()">Xem Công Việc</button>
+			<ul id="myJobList"></ul>
+		</div> 
+
+		<div id="subordinatesJobs" class="section hidden">
+			<h2>Công Việc Cấp Dưới</h2>
+			<button onclick="getSubordinatesJobs()">Xem Công Việc</button>
+			<ul id="subordinatesJobList"></ul>
+		</div>
+
+		<div id="updateJobStatus" class="section hidden">
+			<h2>Cập Nhật Trạng Thái</h2>
+			<input type="number" id="jobIdUpdate" placeholder="Job ID"> <select
+				id="newStatus">
+				<option value="COMPLETED">COMPLETED</option>
+			</select>
+			<button onclick="updateJobStatus()">Cập Nhật</button>
+		</div>
+
+		<div id="approveJob" class="section hidden">
+			<h2>Duyệt Công Việc</h2>
+			<input type="number" id="jobIdApprove" placeholder="Job ID">
+			<button onclick="approveJob()">Duyệt</button>
+		</div>
+
+		<div id="rejectJob" class="section hidden">
+			<h2>Từ Chối Công Việc</h2>
+			<input type="number" id="jobIdReject" placeholder="Job ID">
+			<button onclick="rejectJob()">Từ chối</button>
+		</div>
+
+		<div id="subordinates" class="section hidden">
+			<h2>Nhân Viên Phòng Ban Con</h2>
+			<button onclick="fetchSubordinates()">Xem Nhân Viên</button>
+			<ul id="subordinateList"></ul>
+		</div>
+
+		<div id="statistics" class="section hidden">
+			<h2>Thống Kê Công Việc</h2>
+			<canvas id="jobChart" width="400" height="200"></canvas>
+			<button onclick="fetchJobStatistics()">Xem Thống Kê</button>
+		</div>
+	</div>
+
+	<script>
+        let userId = null;
+
+        function showSection(id) {
+            document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
+            document.getElementById(id).classList.remove("hidden");
+        }
+
         function login() {
-            const userName = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-
-            fetch(`http://localhost:8080/user/login?userName=${userName}&password=${password}`, { method: "POST" })
-            .then(response => response.text()) // Đọc dữ liệu dưới dạng chuỗi
-.then(text => {
-    try {
-        const data = JSON.parse(text); // Nếu backend trả JSON, parse bình thường
-        localStorage.setItem("userId", data.userId);
-        alert("Đăng nhập thành công!");
-    } catch (e) {
-        alert(text); // Nếu backend trả chuỗi, hiển thị trực tiếp
-    }
-})
-
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            fetch("/user/login?userName=" + username + "&password=" + password, { method: "POST" })
+                .then(res => res.text())
+                .then(data => {
+                    alert(data);
+                    if (data.includes("successful")) {
+                        userId = 1; // Thay thế bằng logic lấy userId thực tế
+                        sessionStorage.setItem("userId", userId);
+                    }
+                });
+        }
 
         function createJob() {
-            const jobName = document.getElementById("jobName").value;
-            const deadline = document.getElementById("deadline").value;
-            const userId = localStorage.getItem("userId");
-
-            fetch(`http://localhost:8080/user/createJob?jobName=${jobName}&deadline=${deadline}&createdUserId=${userId}&executedUserId=${userId}`, {
+            let jobName = document.getElementById("jobNameCreate").value;
+            let deadline = document.getElementById("deadlineCreate").value;
+            let executedId = document.getElementById("executedIdCreate").value;
+            fetch("/user/createJob", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jobName, deadline, executedId })
             })
-            .then(response => response.json())
-            .then(data => alert("Tạo công việc thành công!"))
-            .catch(error => alert("Lỗi khi tạo công việc!"));
+                .then(res => res.json())
+                .then(data => alert("Tạo công việc thành công: " + JSON.stringify(data)));
+        }
+
+        function createApproveJob() {
+            let jobName = document.getElementById("jobNameApprove").value;
+            let deadline = document.getElementById("deadlineApprove").value;
+            fetch("/user/createApproveJob", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jobName, deadline })
+            })
+                .then(res => res.json())
+                .then(data => alert("Tạo công việc thành công: " + JSON.stringify(data)));
         }
 
         function getMyJobs() {
-            const userId = localStorage.getItem("userId");
-            fetch(`http://localhost:8080/user/my-jobs?executedId=${userId}`)
-            .then(response => response.json())
-            .then(data => displayJobs(data, "myJobs"))
-            .catch(error => console.error("Lỗi:", error));
+            fetch("/user/my-jobs")
+                .then(res => res.json())
+                .then(jobs => {
+                    let list = document.getElementById("myJobList");
+                    list.innerHTML = "";
+                    jobs.forEach(job => list.innerHTML += `<li>${job.jobName} - ${job.status} - Hạn: ${job.deadline}</li>`);
+                });
         }
 
-        function getSubordinateJobs() {
-            const userId = localStorage.getItem("userId");
-            fetch(`http://localhost:8080/user/subordinates-jobs?approverId=${userId}`)
-            .then(response => response.json())
-            .then(data => displayJobs(data, "subJobs"))
-            .catch(error => console.error("Lỗi:", error));
+        function getSubordinatesJobs() {
+            fetch("/user/subordinates-jobs")
+                .then(res => res.json())
+                .then(jobs => {
+                    let list = document.getElementById("subordinatesJobList");
+                    list.innerHTML = "";
+                    jobs.forEach(job => list.innerHTML += `<li>${job.jobName} - ${job.status} - Hạn: ${job.deadline}</li>`);
+                });
         }
 
-        function getJobStatusCount() {
-            const userId = localStorage.getItem("userId");
-
-            fetch(`http://localhost:8080/user/count-by-status?approverId=${userId}`)
-            .then(response => response.json())
-            .then(data => renderChart(data))
-            .catch(error => console.error("Lỗi:", error));
+        function updateJobStatus() {
+            let jobId = document.getElementById("jobIdUpdate").value;
+            let newStatus = document.getElementById("newStatus").value;
+            fetch(`/user/update-status?jobId=${jobId}&newStatus=${newStatus}`)
+                .then(res => res.json())
+                .then(data => alert("Cập nhật trạng thái thành công: " + JSON.stringify(data)));
         }
 
-        function renderChart(data) {
-            const ctx = document.getElementById("jobStatusChart").getContext("2d");
-
-            const labels = Object.keys(data);
-            const values = Object.values(data);
-
-            if (window.jobChart) window.jobChart.destroy(); // Xóa biểu đồ cũ trước khi vẽ mới
-
-            window.jobChart = new Chart(ctx, {
-                type: "bar", // Biểu đồ cột
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "Số lượng công việc",
-                        data: values,
-                        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4CAF50", "#9C27B0"],
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
+        function approveJob() {
+            let jobId = document.getElementById("jobIdApprove").value;
+            fetch(`/user/approveJob?jobId=${jobId}`, { method: "PUT" })
+                .then(res => res.json())
+                .then(data => alert("Duyệt công việc thành công: " + JSON.stringify(data)));
         }
 
-        function displayJobs(jobs, elementId) {
-            const jobList = document.getElementById(elementId);
-            jobList.innerHTML = "";
-            jobs.forEach(job => {
-                jobList.innerHTML += `<li>
-                    <b>${job.jobName}</b> (Deadline: ${job.deadline}) - Trạng thái: ${job.status}
-                    <button onclick="updateJobStatus(${job.jobId}, 'COMPLETED')">Hoàn thành</button>
-                    <button onclick="approveJob(${job.jobId})">Duyệt</button>
-                    <button onclick="rejectJob(${job.jobId})">Từ chối</button>
-                </li>`;
-            });
+        function rejectJob() {
+            let jobId = document.getElementById("jobIdReject").value;
+            fetch(`/user/rejectApproveJob?jobId=${jobId}`, { method: "PUT" })
+                .then(res => res.json())
+                .then(data => alert("Từ chối công việc thành công: " + JSON.stringify(data)));
         }
+
+        function fetchSubordinates() {
+            fetch("/user/sub-department")
+                .then(res => res.json())
+                .then(users => {
+                    let list = document.getElementById("subordinateList");
+                    list.innerHTML = "";
+                    users.forEach(user => list.innerHTML += `<li>${user.fullName}</li>`);
+                });
+        }
+
+        function fetchJobStatistics() {
+            fetch("/user/count-by-status")
+                .then(res => res.json())
+                .then(data => {
+                    let labels = Object.keys(data);
+                    let values = Object.values(data);
+                    let ctx = document.getElementById('jobChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Số lượng công việc',
+                                data: values,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                });
+        }
+
+        // Kiểm tra xem người dùng đã đăng nhập chưa mỗi khi load trang
+        window.addEventListener('load', () => {
+            userId = sessionStorage.getItem("userId");
+            if (userId) {
+                showSection('myJobs'); // Hiển thị trang mặc định sau khi đăng nhập
+            } else {
+                showSection('login'); // Hiển thị trang đăng nhập nếu chưa đăng nhập
+            }
+        });
+
     </script>
-</head>
-<body>
-	<h1>Quản lý Công Việc</h1>
-
-	<h2>Đăng nhập</h2>
-	<label>Tài khoản:</label>
-	<input type="text" id="username">
-	<label>Mật khẩu:</label>
-	<input type="password" id="password">
-	<button onclick="login()">Đăng nhập</button>
-
-	<h2>Tạo Công Việc</h2>
-	<label>Tên công việc:</label>
-	<input type="text" id="jobName">
-	<label>Hạn chót:</label>
-	<input type="date" id="deadline">
-	<button onclick="createJob()">Tạo</button>
-
-	<h2>Danh sách Công Việc của tôi</h2>
-	<button onclick="getMyJobs()">Xem công việc</button>
-	<ul id="myJobs"></ul>
-
-	<h2>Danh sách Công Việc của cấp dưới</h2>
-	<button onclick="getSubordinateJobs()">Xem công việc của cấp
-		dưới</button>
-	<ul id="subJobs"></ul>
-
-	<h2>Thống kê trạng thái công việc</h2>
-	<button onclick="getJobStatusCount()">Xem thống kê</button>
-	<canvas id="jobStatusChart" width="400" height="400"></canvas>
 </body>
 </html>

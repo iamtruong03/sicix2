@@ -52,6 +52,18 @@ public class UserService {
 
         return true;
     }
+	
+	public Long authenticate(String userName, String password) {
+        Optional<User> optionalUser = userReponsitory.findByUserName(userName);
+        
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.getPassword().equals(password)) {
+                return user.getId(); // Trả về userId
+            }
+        }
+        return null; // Trả về null nếu không hợp lệ
+    }
 
 	// danh sach user duoi cap co the nhan job
 //	public List<User> getAllowedExecutors() {
@@ -60,3 +72,4 @@ public class UserService {
 //	}
 
 }
+
