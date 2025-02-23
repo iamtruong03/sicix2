@@ -6,7 +6,7 @@ public class test {
   List<Job> viecCanLam;
   List<Job> viecCanduyet;
 
-  public List<User> danhSachCacThangDeCoTheGiaViec(Job) {
+  public List<User> danhSachCacThangDeCoTheGiaViec() {
     List<String> listSubDepartMentId = DepartmentService.findSubDepartmentByDepartMentId(this.departmentId);
     List<User> de = UserService.findEmployeeByListDepartMentId(listSubDepartMentId);
     return de;
@@ -197,6 +197,33 @@ public User createUser(User user) {
 
 //    @GetMapping("/departmentlist")
 
+// departmentcontroller
+	public ResponseEntity<List<User>> getUsersByDepartment(@PathVariable Long departmentId) {
+	    List<User> users = departmentService.getUsersByDepartment(departmentId);
+	    return ResponseEntity.ok(users);
+	}
+
+
+	 // API lấy phòng ban cha
+    @GetMapping("/{departmentId}/parent")
+    public ResponseEntity<Department> getParent(@PathVariable Long departmentId) {
+        Department parent = departmentService.getParent(departmentId);
+        return parent != null ? ResponseEntity.ok(parent) : ResponseEntity.notFound().build();
+    }
+
+    // API lấy danh sách con của department_id
+    @GetMapping("/{departmentId}/children")
+    public ResponseEntity<List<Department>> getChildren(@PathVariable Long departmentId) {
+        List<Department> children = departmentService.getChildren(departmentId);
+        return ResponseEntity.ok(children);
+    }
+
+    // API lấy danh sách con cháu của department_id (tất cả cấp)
+    @GetMapping("/{departmentId}/descendants")
+    public ResponseEntity<List<Department>> getDescendants(@PathVariable Long departmentId) {
+        List<Department> descendants = departmentService.getDescendants(departmentId);
+        return ResponseEntity.ok(descendants);
+    }
 
    */
 }

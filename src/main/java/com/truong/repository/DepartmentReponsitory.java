@@ -17,6 +17,11 @@ public interface DepartmentReponsitory extends JpaRepository<Department, Long> {
     List<Department> findSubDepartmentByDepartmentId(Long departmentId);
     List<Department> findByParentDepartment(Department parentDepartment);
     boolean existsByNameDepartment(String namedepartment);
+
+    @Query("SELECT d FROM Department d WHERE d.parentDepartment.departmentId = :parentId")
+    List<Department> findByParentId(@Param("parentId") Long parentId);
+
+
 }
 
 
