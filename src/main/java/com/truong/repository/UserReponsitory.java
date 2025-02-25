@@ -22,6 +22,7 @@ public interface UserReponsitory extends JpaRepository<User, Long> {
 	List<User> findByDepartmentIds(@Param("departmentIds") List<Long> departmentIds);
 
 	List<User> findByDepartment(Department department);
+	
 //  boolean existsByUserName(String username);
 //  List<User> findByDepartmentId(List<Long> departmentId);
 //  @Query("SELECT u FROM User u WHERE u.department.departmentId = :departmentId")

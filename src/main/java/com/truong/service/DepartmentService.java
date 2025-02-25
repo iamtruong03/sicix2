@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.truong.dto.UserDTO;
 import com.truong.entities.Department;
 import com.truong.entities.User;
 import com.truong.repository.DepartmentReponsitory;
@@ -29,8 +30,31 @@ public class DepartmentService {
 		}
 	}
 
-	// Lấy danh sách user thuộc phòng ban con
-	public List<User> getUsersByDepartment(Long departmentId) {
+//	// Lấy danh sách user thuộc phòng ban con
+//	public List<User> getUsersByDepartment(Long departmentId) {
+//		// Lấy phòng ban cha từ ID
+//		Department parentDepartment = departmentReponsitory.findById(departmentId)
+//				.orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ban với ID: " + departmentId));
+//
+//		// Lấy danh sách tất cả phòng ban con (KHÔNG bao gồm phòng ban chính)
+//		List<Department> subDepartments = new ArrayList<>();
+//		getAllSubDepartments(parentDepartment, subDepartments);
+//		subDepartments.remove(parentDepartment); // Loại bỏ phòng ban chính
+//
+//		// Lấy danh sách ID của các phòng ban con
+//		List<Long> departmentIds = subDepartments.stream()
+//				.map(Department::getDepartmentId)
+//				.collect(Collectors.toList());
+//
+//		// Nếu không có phòng ban con => trả về danh sách rỗng
+//		if (departmentIds.isEmpty()) {
+//			return Collections.emptyList();
+//		}
+//
+//		// Lấy danh sách user thuộc các phòng ban con
+//		return userReponsitory.findByDepartmentIds(departmentIds);
+//	}
+	public List<UserDTO> getUsersByDepartment(Long departmentId) {
 		// Lấy phòng ban cha từ ID
 		Department parentDepartment = departmentReponsitory.findById(departmentId)
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ban với ID: " + departmentId));
@@ -41,8 +65,7 @@ public class DepartmentService {
 		subDepartments.remove(parentDepartment); // Loại bỏ phòng ban chính
 
 		// Lấy danh sách ID của các phòng ban con
-		List<Long> departmentIds = subDepartments.stream()
-				.map(Department::getDepartmentId)
+		List<Long> departmentIds = subDepartments.stream().map(Department::getDepartmentId)
 				.collect(Collectors.toList());
 
 		// Nếu không có phòng ban con => trả về danh sách rỗng
@@ -50,11 +73,15 @@ public class DepartmentService {
 			return Collections.emptyList();
 		}
 
-		// Lấy danh sách user thuộc các phòng ban con
-		return userReponsitory.findByDepartmentIds(departmentIds);
+		// Lấy danh sách user thuộc các phòng ban con và chuyển đổi sang DTO
+		return userReponsitory.findByDepartmentIds(departmentIds).stream()
+				.map(user -> new UserDTO(user.getId(), user.getFullName(), user.getUsername(), user.getAddress(),
+						user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null 
+																									
+																										
+				)).collect(Collectors.toList());
+
 	}
-
-
 
 //	// Lấy phòng ban cha
 //	public Department getParent(Long departmentId) {

@@ -1,207 +1,445 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản Lý Công Việc</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-body {
-	font-family: Arial, sans-serif;
-	margin: 20px;
-	display: flex;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Phòng Ban</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+        }
 
-.menu {
-	width: 200px;
-	background: #007bff;
-	padding: 10px;
-	color: white;
-	display: flex;
-	flex-direction: column;
-}
+        /* Menu dọc */
+        .menu {
+            width: 200px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            padding: 15px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
 
-.menu a {
-	color: white;
-	text-decoration: none;
-	cursor: pointer;
-	padding: 10px;
-	margin-bottom: 5px;
-	border-radius: 5px;
-	display: block;
-}
+        /* Mục menu */
+        .menu a,
+        .dropdown-btn {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
 
-.menu a:hover {
-	background-color: #0056b3;
-}
+        .menu a:hover,
+        .dropdown-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
 
-.container {
-	flex-grow: 1;
-	margin-left: 20px;
-}
+        /* Icon */
+        .menu i {
+            font-size: 18px;
+        }
 
-.section {
-	margin-bottom: 20px;
-}
+        /* Dropdown menu */
+        .dropdown {
+            position: relative;
+            width: 100%;
+        }
 
-.hidden {
-	display: none;
-}
+        .dropdown-content {
+            display: none;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.1);
+            padding-left: 15px;
+            margin-top: 5px;
+            border-left: 2px solid white;
+        }
 
-button {
-	margin-top: 10px;
-	padding: 5px;
-	cursor: pointer;
-}
+        .dropdown:hover .dropdown-content {
+            display: flex;
+        }
 
-ul {
-	list-style: none;
-	padding: 0;
-}
+        .dropdown-content a {
+            padding: 8px;
+            font-size: 14px;
+        }
 
-li {
-	margin-bottom: 5px;
-}
+        /* Khu vực nội dung */
+        .container {
+            flex-grow: 1;
+            margin-left: 220px;
+            padding: 20px;
+            overflow-y: auto;
+        }
 
-</style>
+        /* Ẩn các section mặc định */
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 7px 12px;
+            cursor: pointer;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Styles for statistics sections */
+        #statisticsContainer {
+            display: flex;
+            flex-direction: column;
+            /* Stack statistics sections vertically */
+        }
+
+        .statistics-section {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
+
 <body>
-	<div class="menu">
-		<a onclick="showSection('login')">Đăng Nhập</a> <a
-			onclick="showSection('createJob')">Tạo Công Việc (Người tạo)</a> <a
-			onclick="showSection('createApproveJob')">Tạo Công Việc (Cần
-			duyệt)</a> <a onclick="showSection('myJobs')">Công Việc Của Tôi</a> <a
-			onclick="showSection('subordinatesJobs')">Công Việc Cấp Dưới</a> <a
-			onclick="showSection('updateJobStatus')">Cập Nhật Trạng Thái</a> <a
-			onclick="showSection('approveJob')">Duyệt Công Việc</a> <a
-			onclick="showSection('rejectJob')">Từ Chối Công Việc</a> <a
-			onclick="showSection('subordinates')">Nhân Viên Phòng Ban Con</a> <a
-			onclick="showSection('statistics')">Thống Kê</a>
-	</div>
+    <div class="menu">
+        <a href="#" id="loginButton" onclick="event.preventDefault();showSection('login')">
+            <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+        </a>
 
-	<div class="container">
-		<div id="login" class="section">
-			<h2>Đăng Nhập</h2>
-			<input type="text" id="username" placeholder="Tên đăng nhập">
-			<input type="password" id="password" placeholder="Mật khẩu">
-			<button onclick="login()">Đăng nhập</button>
-		</div>
+        <div class="dropdown">
+            <a class="dropdown-btn" href="#" onclick="event.preventDefault();">
+                <i class="fa-solid fa-briefcase"></i> Quản Lý Công Việc
+            </a>
+            <div class="dropdown-content">
+                <a href="#" onclick="event.preventDefault();showSection('myJobs')">
+                    <i class="fa-solid fa-list-check"></i> Công Việc Của Tôi
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('subordinatesJobs')">
+                    <i class="fa-solid fa-user-group"></i> Công Việc Cấp Dưới
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('createJob')">
+                    <i class="fa-solid fa-plus"></i> Giao Công Việc
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('createApproveJob')">
+                    <i class="fa-solid fa-check"></i> Tạo Công Việc
+                </a>
+            </div>
+        </div>
 
-		<div id="createJob" class="section hidden">
-			<h2>Tạo Công Việc (Người tạo)</h2>
-			<input type="text" id="jobNameCreate" placeholder="Tên công việc">
-			<input type="date" id="deadlineCreate"> <input type="number"
-				id="executedIdCreate" placeholder="ID người thực hiện">
-			<button onclick="createJob()">Tạo</button>
-		</div>
+        <div class="dropdown">
+            <a class="dropdown-btn" href="#" onclick="event.preventDefault();">
+                <i class="fa-solid fa-building"></i> Quản Lý Phòng Ban
+            </a>
+            <div class="dropdown-content">
+                <a href="#" onclick="event.preventDefault();showSection('subdepartment')">
+                    <i class="fa-solid fa-sitemap"></i> Phòng Ban
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('subordinates')">
+                    <i class="fa-solid fa-user-tie"></i> Thành Viên
+                </a>
+            </div>
+        </div>
 
-		<div id="createApproveJob" class="section hidden">
-			<h2>Tạo Công Việc (Cần duyệt)</h2>
-			<input type="text" id="jobNameApprove" placeholder="Tên công việc">
-			<input type="date" id="deadlineApprove">
-			<button onclick="createApproveJob()">Tạo</button>
-		</div>
+        <div class="dropdown">
+            <a class="dropdown-btn" href="#" onclick="event.preventDefault();">
+                <i class="fa-solid fa-chart-pie"></i> Thống Kê
+            </a>
+            <div class="dropdown-content">
+                <a href="#" onclick="event.preventDefault();showSection('myStatistics')">
+                    <i class="fa-solid fa-chart-column"></i> Thống kê của tôi
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('departmentStatistics')">
+                    <i class="fa-solid fa-chart-line"></i> Thống kê phòng ban
+                </a>
+            </div>
+        </div>
 
-		<div id="myJobs" class="section hidden">
-			<h2>Công Việc Của Tôi</h2>
-			<button onclick="getMyJobs()">Xem Công Việc</button>
-			<ul id="myJobList"></ul>
-		</div> 
+        <a href="#" onclick="event.preventDefault();showSection('manageAccounts')">
+            <i class="fa-solid fa-user-gear"></i> Quản Lý Tài Khoản
+        </a>
 
-		<div id="subordinatesJobs" class="section hidden">
-			<h2>Công Việc Cấp Dưới</h2>
-			<button onclick="getSubordinatesJobs()">Xem Công Việc</button>
-			<ul id="subordinatesJobList"></ul>
-		</div>
 
-		<div id="updateJobStatus" class="section hidden">
-			<h2>Cập Nhật Trạng Thái</h2>
-			<input type="number" id="jobIdUpdate" placeholder="Job ID"> <select
-				id="newStatus">
-				<option value="COMPLETED">COMPLETED</option>
-			</select>
-			<button onclick="updateJobStatus()">Cập Nhật</button>
-		</div>
+        <a href="#" id="logoutButton" onclick="event.preventDefault();logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+        </a>
+    </div>
 
-		<div id="approveJob" class="section hidden">
-			<h2>Duyệt Công Việc</h2>
-			<input type="number" id="jobIdApprove" placeholder="Job ID">
-			<button onclick="approveJob()">Duyệt</button>
-		</div>
 
-		<div id="rejectJob" class="section hidden">
-			<h2>Từ Chối Công Việc</h2>
-			<input type="number" id="jobIdReject" placeholder="Job ID">
-			<button onclick="rejectJob()">Từ chối</button>
-		</div>
 
-		<div id="subordinates" class="section hidden">
-			<h2>Nhân Viên Phòng Ban Con</h2>
-			<button onclick="fetchSubordinates()">Xem Nhân Viên</button>
-			<ul id="subordinateList"></ul>
-		</div>
+    <div class="container">
+        <div id="login" class="section">
+            <h2>Đăng Nhập</h2>
+            <input type="text" id="username" placeholder="Tên đăng nhập">
+            <input type="password" id="password" placeholder="Mật khẩu">
+            <button onclick="login()">Đăng nhập</button>
+        </div>
 
-		<div id="statistics" class="section hidden">
-			<h2>Thống Kê Công Việc</h2>
-			<canvas id="jobChart" width="400" height="200"></canvas>
-			<button onclick="fetchJobStatistics()">Xem Thống Kê</button>
-		</div>
-	</div>
+        <div id="createJob" class="section hidden">
+            <h2>Giao Công Việc</h2>
+            <input type="text" id="jobNameCreate" placeholder="Tên công việc">
+            <input type="date" id="deadlineCreate"> <input type="text" id="executedIdCreate"
+                placeholder="Người thực hiện">
 
-	<script>
+            <button onclick="createJob()">Tạo</button>
+        </div>
+
+        <div id="createApproveJob" class="section hidden">
+            <h2>Tạo Công Việc</h2>
+            <input type="text" id="jobNameApprove" placeholder="Tên công việc">
+            <input type="date" id="deadlineApprove">
+            <button onclick="createApproveJob()">Tạo</button>
+        </div>
+
+        <div id="myJobs" class="section hidden">
+            <h2>Công Việc Của Tôi</h2>
+            <button onclick="getMyJobs()">Xem Công Việc</button>
+            <ul id="myJobList"></ul>
+        </div>
+
+        <div id="subordinatesJobs" class="section hidden">
+            <h2>Công Việc Cấp Dưới</h2>
+            <button onclick="getSubordinatesJobs()">Xem Công Việc</button>
+            <ul id="subordinatesJobList"></ul>
+        </div>
+
+        <div id="subordinates" class="section hidden">
+            <h2>Thành Viên</h2>
+            <button onclick="fetchSubordinates()">Xem Thành Viên</button>
+            <table id="subordinateTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ và tên</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Địa chỉ</th>
+
+                    </tr>
+                </thead>
+                <tbody id="subordinateTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="myStatistics" class="section hidden statistics-section">
+            <h2>Thống kê của tôi</h2>
+            <button onclick="getMyStatistics()">Xem thống kê</button>
+        </div>
+        <div id="departmentStatistics" class="section">
+            <h2>Thống kê công việc phòng ban</h2>
+            <button id="loadStatisticsBtn">Xem biểu đồ</button>
+            <div style="width: 80%; max-width: 500px; margin: auto;">
+                <canvas id="statisticsChart"></canvas>
+            </div>
+
+
+
+
+        </div>
+
+
+    </div>
+
+    <script>
         let userId = null;
 
         function showSection(id) {
+            // Ẩn tất cả các section
             document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
-            document.getElementById(id).classList.remove("hidden");
+            document.querySelectorAll(".statistics-section").forEach(sec => sec.classList.add("hidden")); //ẩn cả thống kê
+
+            // Kiểm tra phần tử có tồn tại không trước khi hiển thị
+            let section = document.getElementById(id);
+            if (section) {
+                section.classList.remove("hidden");
+            } else {
+                console.warn("Không tìm thấy section với ID:", id);
+            }
         }
+
 
         function login() {
             let username = document.getElementById("username").value;
             let password = document.getElementById("password").value;
-            fetch("/user/login?userName=" + username + "&password=" + password, { method: "POST" })
-                .then(res => res.text())
+
+            fetch("/user/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userName: username, password: password }) // Gửi JSON
+            })
+                .then(res => res.json())
                 .then(data => {
-                    alert(data);
-                    if (data.includes("successful")) {
-                        userId = 1; // Thay thế bằng logic lấy userId thực tế
-                        sessionStorage.setItem("userId", userId);
+                    if (data.success) {
+                        sessionStorage.setItem("userId", data.userId); // Lưu userId vào sessionStorage
+                        showSection('myJobs'); // Chuyển đến trang công việc
+                        document.getElementById("logoutButton").style.display = "block"; // Hiển thị nút đăng xuất
+                        document.getElementById("loginButton").style.display = "none"; //ẩn nút đăng nhập
+                    } else {
+                        alert(data.message);
                     }
+                })
+                .catch(error => {
+                    console.error("Lỗi đăng nhập:", error);
+                    alert("Lỗi đăng nhập. Vui lòng kiểm tra lại thông tin.");
                 });
         }
+
+
+        function logout() {
+            fetch("/user/logout")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Đăng xuất thành công!");
+                        sessionStorage.removeItem("userId"); // Xóa userId khỏi sessionStorage
+                        showSection('login'); // Hiển thị trang đăng nhập
+                        document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất
+                        document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
+                    } else {
+                        alert("Lỗi khi đăng xuất!");
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    alert("Có lỗi xảy ra!");
+                });
+        }
+
+
 
         function createJob() {
             let jobName = document.getElementById("jobNameCreate").value;
             let deadline = document.getElementById("deadlineCreate").value;
-            let executedId = document.getElementById("executedIdCreate").value;
+            let executedUserIds = document.getElementById("executedIdCreate").value.split(",").map(id => parseInt(id.trim())).filter(id => !isNaN(id)); // Lọc bỏ các giá trị không phải số
+
             fetch("/user/createJob", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ jobName, deadline, executedId })
+                body: JSON.stringify({ jobName, deadline, executedUserIds })
             })
-                .then(res => res.json())
-                .then(data => alert("Tạo công việc thành công: " + JSON.stringify(data)));
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Lỗi khi tạo công việc!");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Tạo công việc thành công!");
+                        // Reset form
+                        document.getElementById("jobNameCreate").value = "";
+                        document.getElementById("deadlineCreate").value = "";
+                        document.getElementById("executedIdCreate").value = "";
+                    } else {
+                        alert("Lỗi: " + data.message);
+                    }
+                })
+                .catch(error => alert("Lỗi: " + error.message));
         }
 
         function createApproveJob() {
             let jobName = document.getElementById("jobNameApprove").value;
             let deadline = document.getElementById("deadlineApprove").value;
+
+            let formData = new URLSearchParams();
+            formData.append("jobName", jobName);
+            formData.append("deadline", deadline);
+
             fetch("/user/createApproveJob", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ jobName, deadline })
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData
             })
                 .then(res => res.json())
-                .then(data => alert("Tạo công việc thành công: " + JSON.stringify(data)));
+                .then(data => {
+                    if (data.jobId) { // Kiểm tra nếu API trả về jobId
+                        alert("Tạo công việc thành công!");
+                        // Reset form
+                        document.getElementById("jobNameApprove").value = "";
+                        document.getElementById("deadlineApprove").value = "";
+                    } else {
+                        alert("Lỗi: " + (data.message || "Không thể tạo công việc"));
+                    }
+                })
+                .catch(error => alert("Lỗi: " + error.message));
         }
 
         function getMyJobs() {
             fetch("/user/my-jobs")
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Lỗi khi lấy dữ liệu công việc!");
+                    }
+                    return res.json();
+                })
                 .then(jobs => {
                     let list = document.getElementById("myJobList");
-                    list.innerHTML = "";
-                    jobs.forEach(job => list.innerHTML += `<li>${job.jobName} - ${job.status} - Hạn: ${job.deadline}</li>`);
+                    list.innerHTML = ""; // Xóa danh sách cũ
+
+                    if (jobs.length === 0) {
+                        list.innerHTML = "<li>Không có công việc nào.</li>";
+                        return;
+                    }
+
+                    jobs.forEach(job => {
+                        list.innerHTML += `
+                            <li>
+                                Tên công việc: <strong>${job.name}</strong> 
+                                - Trạng thái: <span style="color: blue;">${job.jobStatusName || "Không có"}</span> 
+                                - Người duyệt: <span style="color: green;">${job.approverUsername || "Chưa có"}</span> 
+                                - Hạn: <span style="color: red;">${job.deadline || "Không có"}</span>
+                                <button data-job-id="${job.id}" onclick="editJobStatus(this)">Chỉnh sửa trạng thái</button>
+                            </li>`;
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    document.getElementById("myJobList").innerHTML = "<li>Không thể tải danh sách công việc.</li>";
                 });
         }
 
@@ -211,82 +449,208 @@ li {
                 .then(jobs => {
                     let list = document.getElementById("subordinatesJobList");
                     list.innerHTML = "";
-                    jobs.forEach(job => list.innerHTML += `<li>${job.jobName} - ${job.status} - Hạn: ${job.deadline}</li>`);
+                    if (jobs.length === 0) {
+                        list.innerHTML = "<li>Không có công việc nào.</li>";
+                        return;
+                    }
+                    jobs.forEach(job => {
+                        console.log("Debug job:", job); // Kiểm tra dữ liệu job
+                        list.innerHTML += `
+                        <li>
+                            Tên công việc: ${job.name} - Trạng thái: ${job.jobStatusName} - Hạn: ${job.deadline} 
+                            (Người thực hiện: ${job.executedUserNames} - Người duyệt: ${job.approverUsername})
+                            <button data-job-id="${job.id}" onclick="editJobStatus(this)">Chỉnh sửa trạng thái</button>
+                        </li>`;
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    document.getElementById("subordinatesJobList").innerHTML = "<li>Không thể tải danh sách công việc.</li>";
                 });
         }
 
-        function updateJobStatus() {
-            let jobId = document.getElementById("jobIdUpdate").value;
-            let newStatus = document.getElementById("newStatus").value;
-            fetch(`/user/update-status?jobId=${jobId}&newStatus=${newStatus}`)
-                .then(res => res.json())
-                .then(data => alert("Cập nhật trạng thái thành công: " + JSON.stringify(data)));
+        function editJobStatus(button) {
+            let jobId = button.getAttribute("data-job-id");
+
+            if (!jobId) {
+                alert("Lỗi: Không tìm thấy ID công việc!");
+                return;
+            }
+
+            console.log("Editing job with ID:", jobId);
+
+            let newStatusId = prompt("Nhập ID trạng thái mới cho công việc (1: Đang thực hiện, 2: Chờ duyệt, 3: Từ chối, 4: Hoàn thành):");
+
+            if (newStatusId) {
+                fetch(`/user/update-status?jobId=${jobId}&newStatusId=${newStatusId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                })
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error("Lỗi khi cập nhật trạng thái!");
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        alert("Cập nhật trạng thái thành công!");
+                        getSubordinatesJobs();
+                    })
+                    .catch(error => alert("Lỗi: " + error.message));
+            }
         }
 
-        function approveJob() {
-            let jobId = document.getElementById("jobIdApprove").value;
-            fetch(`/user/approveJob?jobId=${jobId}`, { method: "PUT" })
-                .then(res => res.json())
-                .then(data => alert("Duyệt công việc thành công: " + JSON.stringify(data)));
-        }
-
-        function rejectJob() {
-            let jobId = document.getElementById("jobIdReject").value;
-            fetch(`/user/rejectApproveJob?jobId=${jobId}`, { method: "PUT" })
-                .then(res => res.json())
-                .then(data => alert("Từ chối công việc thành công: " + JSON.stringify(data)));
-        }
 
         function fetchSubordinates() {
-            fetch("/user/sub-department")
-                .then(res => res.json())
-                .then(users => {
-                    let list = document.getElementById("subordinateList");
-                    list.innerHTML = "";
-                    users.forEach(user => list.innerHTML += `<li>${user.fullName}</li>`);
+            fetch("/user/sub-users")
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Dữ liệu API:", data); // Debug
+
+                    let tableBody = document.getElementById("subordinateTableBody");
+                    tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Không có nhân viên nào</td></tr>";
+                        return;
+                    }
+
+                    let rows = data.map(user =>
+                        `<tr>
+                            <td>${user.id}</td>
+                            <td>${user.fullName}</td>
+                            <td>${user.username}</td>
+                            <td>${user.address}</td>
+                           
+                        </tr>`
+                    ).join("");
+
+                    tableBody.insertAdjacentHTML("beforeend", rows);
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    document.getElementById("subordinateTableBody").innerHTML = "<tr><td colspan='5' style='text-align: center; color: red;'>Lỗi tải dữ liệu</td></tr>";
                 });
         }
 
-        function fetchJobStatistics() {
-            fetch("/user/count-by-status")
-                .then(res => res.json())
-                .then(data => {
-                    let labels = Object.keys(data);
-                    let values = Object.values(data);
-                    let ctx = document.getElementById('jobChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Số lượng công việc',
-                                data: values,
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("loadStatisticsBtn").addEventListener("click", function () {
+                fetch("/user/subordinate-statistics", { method: "GET", credentials: "include" })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Dữ liệu API nhận được:", data);
+
+                        if (Object.keys(data).length === 0) {
+                            alert("Không có dữ liệu để hiển thị!");
+                            return;
+                        }
+
+                        const labels = Object.keys(data);
+                        const values = Object.values(data);
+                        const ctx = document.getElementById("statisticsChart").getContext("2d");
+
+                        // Hủy biểu đồ cũ nếu có
+                        if (window.statisticsChart instanceof Chart) {
+                            window.statisticsChart.destroy();
+                        }
+
+                        // Vẽ biểu đồ mới với kích thước tự động
+                        window.statisticsChart = new Chart(ctx, {
+                            type: "pie",
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: values,
+                                    backgroundColor: ["#F44336", "#4CAF50", "#FF9800"],
+                                    hoverOffset: 10
+                                }]
+                            },
+                            options: {
+                                responsive: true,  // Biểu đồ tự động co giãn theo kích thước màn hình
+                                maintainAspectRatio: false, // Cho phép thay đổi tỉ lệ
+                                plugins: {
+                                    legend: { position: "bottom" }
                                 }
                             }
-                        }
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi lấy dữ liệu:", error);
+                        alert("Lỗi khi tải dữ liệu. Kiểm tra console!");
                     });
-                });
-        }
+            });
+        });
+
+
+
+
 
         // Kiểm tra xem người dùng đã đăng nhập chưa mỗi khi load trang
         window.addEventListener('load', () => {
             userId = sessionStorage.getItem("userId");
             if (userId) {
                 showSection('myJobs'); // Hiển thị trang mặc định sau khi đăng nhập
+                document.getElementById("logoutButton").style.display = "block"; // Hiển thị nút đăng xuất
+                document.getElementById("loginButton").style.display = "none"; //ẩn nút đăng nhập
             } else {
                 showSection('login'); // Hiển thị trang đăng nhập nếu chưa đăng nhập
+                document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất
+                document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
             }
         });
 
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (!sessionStorage.getItem("userId")) {
+                document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất nếu chưa đăng nhập
+                document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
+            }
+        });
+
+        // quản lý tài khoản
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAccounts();
+        });
+
+        function loadAccounts() {
+            const accounts = [
+                { id: 1, name: "Nguyễn Văn A", email: "a@example.com", role: "Admin" },
+                { id: 2, name: "Trần Thị B", email: "b@example.com", role: "User" }
+            ];
+
+            let tableBody = document.getElementById("accountTableBody");
+            tableBody.innerHTML = "";
+
+            accounts.forEach(acc => {
+                let row = `<tr>
+            <td>${acc.id}</td>
+            <td>${acc.name}</td>
+            <td>${acc.email}</td>
+            <td>${acc.role}</td>
+            <td>
+                <button onclick="editAccount(${acc.id})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                <button onclick="deleteAccount(${acc.id})"><i class="fa-solid fa-trash"></i> Xóa</button>
+            </td>
+        </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function showAddAccountForm() {
+            alert("Hiển thị form thêm tài khoản");
+        }
+
+        function editAccount(id) {
+            alert("Chỉnh sửa tài khoản ID: " + id);
+        }
+
+        function deleteAccount(id) {
+            if (confirm("Bạn có chắc muốn xóa tài khoản ID: " + id + "?")) {
+                alert("Đã xóa tài khoản ID: " + id);
+            }
+        }
+
     </script>
 </body>
+
 </html>

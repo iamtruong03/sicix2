@@ -2,9 +2,10 @@ package com.truong.entities;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.truong.exception.JobStatus;
 
 import jakarta.persistence.*;
 
@@ -12,87 +13,74 @@ import jakarta.persistence.*;
 @Table(name = "job")
 public class Job {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long jobId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long jobId;
 
-  private String jobName;
+	private String jobName;
 
-  @ManyToOne
-  @JoinColumn(name = "created_id")
-  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
-  private User createdId;
+	@ManyToMany
+	@JoinTable(name = "job_executors", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
+	private Set<User> executedUsers = new HashSet<>();
 
-  @ManyToOne
-  @JoinColumn(name = "executed_id")
-  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
-  private User executedId;
+	@ManyToOne
+	@JoinColumn(name = "approver_id")
+	@JsonIgnoreProperties({ "address", "fullName", "password", "department", "username" })
+	private User approverId;
 
-  @ManyToOne
-  @JoinColumn(name = "approver_id")
-  @JsonIgnoreProperties({"address", "fullName", "password", "department", "username"})
-  private User approverId;
+	@ManyToOne
+	@JoinColumn(name = "status_id")
+	private JobStatus jobStatus;
 
-  @Enumerated(EnumType.STRING)
-  private JobStatus status; // Trạng thái công việc
+	private LocalDate deadline; // Hạn chót công việc
 
-  private LocalDate deadline; // Hạn chót công việc
+	public Long getJobId() {
+		return jobId;
+	}
 
-  public Long getJobId() {
-    return jobId;
-  }
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
+	}
 
-  public void setJobId(Long jobId) {
-    this.jobId = jobId;
-  }
+	public String getJobName() {
+		return jobName;
+	}
 
-  public String getJobName() {
-    return jobName;
-  }
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
 
-  public void setJobName(String jobName) {
-    this.jobName = jobName;
-  }
+	public Set<User> getExecutedUsers() {
+		return executedUsers;
+	}
 
-  public User getCreatedId() {
-    return createdId;
-  }
+	public void setExecutedUsers(Set<User> executedUsers) {
+		this.executedUsers = executedUsers;
+	}
 
-  public void setCreatedId(User createdId) {
-    this.createdId = createdId;
-  }
+	public User getApproverId() {
+		return approverId;
+	}
 
-  public User getExecutedId() {
-    return executedId;
-  }
+	public void setApproverId(User approverId) {
+		this.approverId = approverId;
+	}
 
+	public JobStatus getJobStatus() {
+		return jobStatus;
+	}
 
-  public User getApproverId() {
-    return approverId;
-  }
+	public void setJobStatus(JobStatus jobStatus) {
+		this.jobStatus = jobStatus;
+	}
 
-  public void setApproverId(User approverId) {
-    this.approverId = approverId;
-  }
+	public LocalDate getDeadline() {
+		return deadline;
+	}
 
-  public void setExecutedId(User executedId) {
-    this.executedId = executedId;
-  }
-
-  public JobStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(JobStatus status) {
-    this.status = status;
-  }
-
-  public LocalDate getDeadline() {
-    return deadline;
-  }
-
-  public void setDeadline(LocalDate deadline) {
-    this.deadline = deadline;
-  }
-
+	public void setDeadline(LocalDate deadline) {
+		this.deadline = deadline;
+	}
+	
 }

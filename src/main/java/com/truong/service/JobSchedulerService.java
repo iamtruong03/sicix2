@@ -1,7 +1,6 @@
 package com.truong.service;
 
 import com.truong.entities.Job;
-import com.truong.exception.JobStatus;
 import com.truong.repository.JobReponsitory;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,14 +14,14 @@ public class JobSchedulerService {
   @Autowired
   private JobReponsitory jobReponsitory;
 
-  @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 00:00 mỗi ngày
-  public void checkOverdueJobs() {
-    List<Job> jobs = jobReponsitory.findAll();
-    for (Job job : jobs) {
-      if (job.getStatus() == JobStatus.IN_PROGRESS && LocalDate.now().isAfter(job.getDeadline())) {
-        job.setStatus(JobStatus.OVERDUE);
-        jobReponsitory.save(job);
-      }
-    }
-  }
+//  @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 00:00 mỗi ngày
+//  public void checkOverdueJobs() {
+//    List<Job> jobs = jobReponsitory.findAll();
+//    for (Job job : jobs) {
+//      if (job.getStatus() == JobStatus.IN_PROGRESS && LocalDate.now().isAfter(job.getDeadline())) {
+//        job.setStatus(JobStatus.OVERDUE);
+//        jobReponsitory.save(job);
+//      }
+//    }
+//  }
 }
