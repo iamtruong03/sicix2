@@ -13,7 +13,7 @@ import com.truong.entities.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface JobReponsitory extends JpaRepository<Job, Long> {
+public interface JobRepository extends JpaRepository<Job, Long> {
 	List<Job> findByExecutedUsersContaining(User user);
 
 	@Query("SELECT j FROM Job j LEFT JOIN j.executedUsers e "

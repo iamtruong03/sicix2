@@ -1,7 +1,7 @@
 package com.truong.service;
 
 import com.truong.entities.Job;
-import com.truong.repository.JobReponsitory;
+import com.truong.repository.JobRepository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class JobSchedulerService {
 
   @Autowired
-  private JobReponsitory jobReponsitory;
+  private JobRepository jobRepository;
 
 //  @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 00:00 mỗi ngày
 //  public void checkOverdueJobs() {

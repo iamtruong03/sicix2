@@ -10,7 +10,7 @@ import com.truong.entities.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserReponsitory extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
 //	Optional<User> findByUsernameAndPassword(String userName, String password);
 
@@ -22,6 +22,13 @@ public interface UserReponsitory extends JpaRepository<User, Long> {
 	List<User> findByDepartmentIds(@Param("departmentIds") List<Long> departmentIds);
 
 	List<User> findByDepartment(Department department);
+	
+	 // Đếm số lượng nhân viên thuộc một phòng ban
+    int countByDepartment(Department department);
+    
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.department WHERE u.id = :userId")
+    User findUserWithDepartment(@Param("userId") Long userId);
+
 	
 //  boolean existsByUserName(String username);
 //  List<User> findByDepartmentId(List<Long> departmentId);

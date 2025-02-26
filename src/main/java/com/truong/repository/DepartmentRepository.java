@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.truong.entities.Department;
 
 @Repository
-public interface DepartmentReponsitory extends JpaRepository<Department, Long> {
+public interface DepartmentRepository extends JpaRepository<Department, Long> {
     Optional<Department> findByDepartmentId(Long departmentId);
 
     List<Department> findSubDepartmentByDepartmentId(Long departmentId);

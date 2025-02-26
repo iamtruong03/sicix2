@@ -5,7 +5,7 @@ import com.truong.entities.User;
 public class UserDTO {
     private Long id;
     private String fullName;
-    private String username;
+    private String userName;
     private String address;
     private String nameDepartment; // Thêm thuộc tính này
 
@@ -16,16 +16,16 @@ public class UserDTO {
         return new UserDTO(
             user.getId(),
             user.getFullName(),
-            user.getUsername(),
+            user.getUserName(),
             user.getAddress(),
             user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null
         );
     }
 
-    public UserDTO(Long id, String fullName, String username, String address, String nameDepartment) {
+    public UserDTO(Long id, String fullName, String userName, String address, String nameDepartment) {
         this.id = id;
         this.fullName = fullName;
-        this.username = username;
+        this.userName = userName;
         this.address = address;
         this.nameDepartment = nameDepartment;
     }
@@ -46,15 +46,16 @@ public class UserDTO {
         this.fullName = fullName;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getUserName() {
+		return userName;
+	}
 
-    public String getAddress() {
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getAddress() {
         return address;
     }
 

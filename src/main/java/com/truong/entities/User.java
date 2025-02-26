@@ -31,6 +31,11 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
+    
+    public boolean isAdmin() {
+        return this.department == null;
+    }
+
 
 	public Long getId() {
 		return id;
@@ -56,12 +61,12 @@ public class User {
 		this.fullName = fullName;
 	}
 
-	public String getUsername() {
+	public String getUserName() {
 		return userName;
 	}
 
-	public void setUsername(String username) {
-		this.userName = username;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	public String getPassword() {
@@ -80,5 +85,12 @@ public class User {
 		this.department = department;
 	}
 
-    
+	public User() {
+	}
+
+	
+
+
+
+
 }

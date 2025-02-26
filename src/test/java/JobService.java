@@ -3,10 +3,10 @@ import com.truong.entities.Department;
 import com.truong.entities.Job;
 import com.truong.entities.JobStatus;
 import com.truong.entities.User;
-import com.truong.repository.DepartmentReponsitory;
-import com.truong.repository.JobReponsitory;
+import com.truong.repository.DepartmentRepository;
+import com.truong.repository.JobRepository;
 import com.truong.repository.JobStatusRepository;
-import com.truong.repository.UserReponsitory;
+import com.truong.repository.UserRepository;
 import com.truong.service.DepartmentService;
 
 import jakarta.transaction.Transactional;
@@ -28,13 +28,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobService {
 	@Autowired
-	private UserReponsitory userReponsitory;
+	private UserRepository userRepository;
 	@Autowired
-	private JobReponsitory jobReponsitory;
+	private JobRepository jobRepository;
 	@Autowired
 	private JobStatusRepository jobStatusRepository;
 	@Autowired
-	private DepartmentReponsitory departmentReponsitory;
+	private DepartmentRepository departmentRepository;
 	@Autowired
 	private DepartmentService departmentService;
 	private final Random random = new Random();
@@ -47,7 +47,7 @@ public class JobService {
 		}
 
 		// Tìm thông tin user tạo (cũng là người phê duyệt)
-		User createdUser = userReponsitory.findById(createdUserId)
+		User createdUser = userRepository.findById(createdUserId)
 				.orElseThrow(() -> new RuntimeException("User tạo không tồn tại!"));
 
 		// Lấy danh sách nhân viên thuộc phòng ban con của người tạo
@@ -60,7 +60,7 @@ public class JobService {
 			if (createdUserId.equals(executedUserId)) {
 				throw new RuntimeException("Người tạo không được trùng với người thực hiện!");
 			}
-			User executedUser = userReponsitory.findById(executedUserId)
+			User executedUser = userRepository.findById(executedUserId)
 					.orElseThrow(() -> new RuntimeException("User thực hiện không tồn tại!"));
 
 			if (!allowedExecutors.contains(executedUser)) {
@@ -82,17 +82,17 @@ public class JobService {
 		job.setApproverId(createdUser); // Người tạo cũng là người phê duyệt
 		job.setExecutedUsers(executedUsers);
 
-		return jobReponsitory.save(job);
+		return jobRepository.save(job);
 	}
 
 	// xem list my job
 	public List<Map<String, Object>> getJobsByExecutedId(Long id) {
 		// Kiểm tra xem người dùng có tồn tại không
-		User executedUser = userReponsitory.findById(id)
+		User executedUser = userRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Người thực hiện không tồn tại!"));
 
 		// Lấy danh sách công việc mà user đang thực hiện
-		List<Job> jobs = jobReponsitory.findByExecutedUsersContaining(executedUser);
+		List<Job> jobs = jobRepository.findByExecutedUsersContaining(executedUser);
 
 		// Chuyển đổi danh sách công việc sang danh sách Map chứa thông tin bổ sung
 		return jobs.stream().map(job -> {
@@ -117,7 +117,7 @@ public class JobService {
 	// xem list job của các phòng ban con	
 	public List<Job> getJobsOfSubordinates(Long userId) {
 	    // Tìm người duyệt theo userId
-	    User approver = userReponsitory.findById(userId)
+	    User approver = userRepository.findById(userId)
 	            .orElseThrow(() -> new RuntimeException("Người duyệt không tồn tại!"));
 
 	    // Lấy danh sách nhân viên cấp dưới của phòng ban con
@@ -129,14 +129,14 @@ public class JobService {
 	    }
 
 	    // Lấy danh sách công việc của cấp dưới
-	    return jobReponsitory.findJobsOfSubordinates(approver, subordinates);
+	    return jobRepository.findJobsOfSubordinates(approver, subordinates);
 	}
 //
 //
 	// complete Job
 	public Job updateJobStatus(Long jobId, Long userId, JobStatus newStatus) {
 		// Lấy công việc từ DB
-		Job job = jobReponsitory.findById(jobId).orElseThrow(() -> new RuntimeException("Công việc không tồn tại!"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Công việc không tồn tại!"));
 
 		if (job.getStatus() == JobStatus.REJECTED) {
 			throw new RuntimeException("Job đã bị từ chối, không thể chỉnh sửa!");
@@ -150,7 +150,7 @@ public class JobService {
 		// Kiểm tra nếu job đã quá hạn deadline → tự động cập nhật thành OVERDUE
 		if (LocalDate.now().isAfter(job.getDeadline())) {
 			job.setStatus(JobStatus.OVERDUE);
-			return jobReponsitory.save(job);
+			return jobRepository.save(job);
 		}
 
 		// Chỉ executedId (người thực hiện) mới có quyền cập nhật trạng thái
@@ -161,7 +161,7 @@ public class JobService {
 		// Chỉ cho phép cập nhật từ IN_PROGRESS → COMPLETED
 		if (job.getStatus() == JobStatus.IN_PROGRESS && newStatus == JobStatus.COMPLETED) {
 			job.setStatus(JobStatus.COMPLETED);
-			return jobReponsitory.save(job);
+			return jobRepository.save(job);
 		} else {
 			throw new RuntimeException("Không thể cập nhật trạng thái này!");
 		}
@@ -171,7 +171,7 @@ public class JobService {
 	@Transactional
 	public Job createApproveJob(Long id, String jobName, LocalDate deadline) {
 		// Lấy thông tin user tạo job
-		User user = userReponsitory.findById(id).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
+		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại!"));
 
 		// Lấy phòng ban của user
 		Department userDepartment = user.getDepartment();
@@ -183,7 +183,7 @@ public class JobService {
 		Department parentDepartment = userDepartment.getParentDepartment();
 
 		// Lấy danh sách user thuộc phòng ban cha
-		List<User> approvers = userReponsitory.findByDepartment(parentDepartment);
+		List<User> approvers = userRepository.findByDepartment(parentDepartment);
 		if (approvers.isEmpty()) {
 			throw new RuntimeException("Không có người duyệt trong phòng ban cấp trên!");
 		}
@@ -200,13 +200,13 @@ public class JobService {
 		job.setDeadline(deadline);
 		job.setStatus(JobStatus.WAITING);
 
-		return jobReponsitory.save(job);
+		return jobRepository.save(job);
 	}
 
 	// duyệt approve job
 	@Transactional
 	public Job approveJob(Long approverId, Long jobId) {
-		Job job = jobReponsitory.findById(jobId).orElseThrow(() -> new RuntimeException("Job không tồn tại!"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job không tồn tại!"));
 
 		// Kiểm tra người duyệt có đúng không
 		if (!job.getApproverId().getId().equals(approverId)) {
@@ -218,33 +218,33 @@ public class JobService {
 
 		// Cập nhật trạng thái
 		job.setStatus(JobStatus.IN_PROGRESS);
-		return jobReponsitory.save(job);
+		return jobRepository.save(job);
 	}
 
 	// từ chối duyệt
 	@Transactional
 	public Job rejectJob(Long approverId, Long jobId) {
-		Job job = jobReponsitory.findById(jobId).orElseThrow(() -> new RuntimeException("Job không tồn tại!"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job không tồn tại!"));
 
 		if (!job.getApproverId().getId().equals(approverId)) {
 			throw new RuntimeException("Bạn không có quyền từ chối job này!");
 		}
 
 		job.setStatus(JobStatus.REJECTED);
-		return jobReponsitory.save(job);
+		return jobRepository.save(job);
 	}
 //	
 	// thống kê
 	public Map<JobStatus, Long> countJobsByStatusForSubordinates(Long approverId) {
         // Lấy thông tin của approver (người duyệt)
-        User approver = userReponsitory.findById(approverId)
+        User approver = userRepository.findById(approverId)
                 .orElseThrow(() -> new RuntimeException("Người duyệt không tồn tại!"));
 
         // Lấy danh sách cấp dưới
         List<User> subordinates = departmentService.getUsersByDepartment(approver.getDepartment().getDepartmentId());
 
         // Gọi repository để lấy số lượng Job theo trạng thái
-        List<Object[]> result = jobReponsitory.countJobsByStatusForSubordinates(approver, subordinates);
+        List<Object[]> result = jobRepository.countJobsByStatusForSubordinates(approver, subordinates);
 
         // Chuyển đổi danh sách Object[] thành Map<JobStatus, Long>
         Map<JobStatus, Long> jobCountMap = new HashMap<>();

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Phòng Ban</title>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -182,7 +183,7 @@
                     <i class="fa-solid fa-sitemap"></i> Phòng Ban
                 </a>
                 <a href="#" onclick="event.preventDefault();showSection('subordinates')">
-                    <i class="fa-solid fa-user-tie"></i> Thành Viên
+                    <i class="fa-solid fa-user-tie"></i> Nhân Viên
                 </a>
             </div>
         </div>
@@ -201,17 +202,23 @@
             </div>
         </div>
 
-        <a href="#" onclick="event.preventDefault();showSection('manageAccounts')">
-            <i class="fa-solid fa-user-gear"></i> Quản Lý Tài Khoản
-        </a>
-
-
+        <div class="dropdown">
+            <a class="dropdown-btn" href="#" onclick="event.preventDefault();">
+                <i class="fa-solid fa-users-cog"></i> Quản Lý Tài Khoản
+            </a>
+            <div class="dropdown-content">
+                <a href="#" onclick="event.preventDefault();showSection('myAccount')">
+                    <i class="fa-solid fa-user"></i> Tài Khoản Của Tôi
+                </a>
+                <a href="#" onclick="event.preventDefault();showSection('manageAccounts')">
+                    <i class="fa-solid fa-users"></i> Tài Khoản Nhân Viên
+                </a>
+            </div>
+        </div>
         <a href="#" id="logoutButton" onclick="event.preventDefault();logout()">
             <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
         </a>
     </div>
-
-
 
     <div class="container">
         <div id="login" class="section">
@@ -249,22 +256,74 @@
             <ul id="subordinatesJobList"></ul>
         </div>
 
-        <div id="subordinates" class="section hidden">
-            <h2>Thành Viên</h2>
-            <button onclick="fetchSubordinates()">Xem Thành Viên</button>
-            <table id="subordinateTable">
+   
+        
+        <div id="subdepartment" class="section" style="display: none;">
+            <h2>Quản Lý Phòng Ban</h2>
+        
+            <div id="departmentInfo">
+                <h3>Thông Tin Phòng Ban Của Bạn</h3>
+                <button onclick="fetchUserDepartmentInfo()">Xem thông tin</button>
+                <p><strong>ID:</strong> <span id="deptId"></span></p>
+                <table border="1">
+                    <tr>
+                        <th>Tên Phòng Ban</th>
+                        <td id="deptName"></td>
+                    </tr>
+                    <tr>
+                        <th>Thuộc Phòng Ban</th>
+                        <td id="parentDept"></td>
+                    </tr>
+                    <tr>
+                        <th>Nhân Sự</th>
+                        <td id="numUser"></td>
+                    </tr>
+                    <tr>
+                        <th>Tổng Nhân sự</th>
+                        <td id="numEmployees"></td>
+                    </tr>
+                </table>
+            </div>
+            
+        
+            <button onclick="showAddDepartmentForm()">
+                <i class="fa-solid fa-plus"></i> Thêm Phòng Ban
+            </button>
+            <table border="1">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Họ và tên</th>
-                        <th>Tên đăng nhập</th>
-                        <th>Địa chỉ</th>
+                        <th>Tên Phòng Ban</th>
+                        <th>Thuộc Phòng Ban</th>
+                        <th>Nhân Sự</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="departmentTableBody">
+                    <!-- Dữ liệu phòng ban sẽ được thêm vào đây -->
+                </tbody>
+            </table>
+        </div>
+        
+        
+        
+        
 
+        <div id="subordinates" class="section hidden">
+            <h2>Nhân Viên</h2>
+            <button onclick="fetchSubordinates()">Xem Nhân Viên</button>
+            <table id="subordinateTable">
+                <thead>
+                    <tr>
+                        <th>Họ Tên</th>
+                        <th>Phòng Ban</th>
+                        <th>Hành Động</th>
                     </tr>
                 </thead>
                 <tbody id="subordinateTableBody"></tbody>
             </table>
         </div>
+        
 
         <div id="myStatistics" class="section hidden statistics-section">
             <h2>Thống kê của tôi</h2>
@@ -276,381 +335,50 @@
             <div style="width: 80%; max-width: 500px; margin: auto;">
                 <canvas id="statisticsChart"></canvas>
             </div>
-
-
-
-
         </div>
 
+        
+        <div id="myAccount" class="section" style="display: none;">
+            <h2>Thông Tin Tài Khoản</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Tên đầy đủ</th>
+                        <th>Mật khẩu</th>
+                        <th>Địa chỉ</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="accountTableBody">
+                    <!-- Dữ liệu tài khoản sẽ được thêm vào đây -->
+                </tbody>
+            </table>
+        </div>
 
+        <div id="manageAccounts" class="section" style="display: none;">
+            <h2>Quản Lý Tài Khoản</h2>
+            <button onclick="showAddAccountForm()">
+                <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
+            </button>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên đầy đủ</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Mật khẩu</th>
+                        <th>Địa chỉ</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="accountTableBody">
+                    <!-- Dữ liệu tài khoản sẽ được thêm vào đây -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <script>
-        let userId = null;
-
-        function showSection(id) {
-            // Ẩn tất cả các section
-            document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
-            document.querySelectorAll(".statistics-section").forEach(sec => sec.classList.add("hidden")); //ẩn cả thống kê
-
-            // Kiểm tra phần tử có tồn tại không trước khi hiển thị
-            let section = document.getElementById(id);
-            if (section) {
-                section.classList.remove("hidden");
-            } else {
-                console.warn("Không tìm thấy section với ID:", id);
-            }
-        }
-
-
-        function login() {
-            let username = document.getElementById("username").value;
-            let password = document.getElementById("password").value;
-
-            fetch("/user/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userName: username, password: password }) // Gửi JSON
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        sessionStorage.setItem("userId", data.userId); // Lưu userId vào sessionStorage
-                        showSection('myJobs'); // Chuyển đến trang công việc
-                        document.getElementById("logoutButton").style.display = "block"; // Hiển thị nút đăng xuất
-                        document.getElementById("loginButton").style.display = "none"; //ẩn nút đăng nhập
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi đăng nhập:", error);
-                    alert("Lỗi đăng nhập. Vui lòng kiểm tra lại thông tin.");
-                });
-        }
-
-
-        function logout() {
-            fetch("/user/logout")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Đăng xuất thành công!");
-                        sessionStorage.removeItem("userId"); // Xóa userId khỏi sessionStorage
-                        showSection('login'); // Hiển thị trang đăng nhập
-                        document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất
-                        document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
-                    } else {
-                        alert("Lỗi khi đăng xuất!");
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Có lỗi xảy ra!");
-                });
-        }
-
-
-
-        function createJob() {
-            let jobName = document.getElementById("jobNameCreate").value;
-            let deadline = document.getElementById("deadlineCreate").value;
-            let executedUserIds = document.getElementById("executedIdCreate").value.split(",").map(id => parseInt(id.trim())).filter(id => !isNaN(id)); // Lọc bỏ các giá trị không phải số
-
-            fetch("/user/createJob", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ jobName, deadline, executedUserIds })
-            })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error("Lỗi khi tạo công việc!");
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert("Tạo công việc thành công!");
-                        // Reset form
-                        document.getElementById("jobNameCreate").value = "";
-                        document.getElementById("deadlineCreate").value = "";
-                        document.getElementById("executedIdCreate").value = "";
-                    } else {
-                        alert("Lỗi: " + data.message);
-                    }
-                })
-                .catch(error => alert("Lỗi: " + error.message));
-        }
-
-        function createApproveJob() {
-            let jobName = document.getElementById("jobNameApprove").value;
-            let deadline = document.getElementById("deadlineApprove").value;
-
-            let formData = new URLSearchParams();
-            formData.append("jobName", jobName);
-            formData.append("deadline", deadline);
-
-            fetch("/user/createApproveJob", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.jobId) { // Kiểm tra nếu API trả về jobId
-                        alert("Tạo công việc thành công!");
-                        // Reset form
-                        document.getElementById("jobNameApprove").value = "";
-                        document.getElementById("deadlineApprove").value = "";
-                    } else {
-                        alert("Lỗi: " + (data.message || "Không thể tạo công việc"));
-                    }
-                })
-                .catch(error => alert("Lỗi: " + error.message));
-        }
-
-        function getMyJobs() {
-            fetch("/user/my-jobs")
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error("Lỗi khi lấy dữ liệu công việc!");
-                    }
-                    return res.json();
-                })
-                .then(jobs => {
-                    let list = document.getElementById("myJobList");
-                    list.innerHTML = ""; // Xóa danh sách cũ
-
-                    if (jobs.length === 0) {
-                        list.innerHTML = "<li>Không có công việc nào.</li>";
-                        return;
-                    }
-
-                    jobs.forEach(job => {
-                        list.innerHTML += `
-                            <li>
-                                Tên công việc: <strong>${job.name}</strong> 
-                                - Trạng thái: <span style="color: blue;">${job.jobStatusName || "Không có"}</span> 
-                                - Người duyệt: <span style="color: green;">${job.approverUsername || "Chưa có"}</span> 
-                                - Hạn: <span style="color: red;">${job.deadline || "Không có"}</span>
-                                <button data-job-id="${job.id}" onclick="editJobStatus(this)">Chỉnh sửa trạng thái</button>
-                            </li>`;
-                    });
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    document.getElementById("myJobList").innerHTML = "<li>Không thể tải danh sách công việc.</li>";
-                });
-        }
-
-        function getSubordinatesJobs() {
-            fetch("/user/subordinates-jobs")
-                .then(res => res.json())
-                .then(jobs => {
-                    let list = document.getElementById("subordinatesJobList");
-                    list.innerHTML = "";
-                    if (jobs.length === 0) {
-                        list.innerHTML = "<li>Không có công việc nào.</li>";
-                        return;
-                    }
-                    jobs.forEach(job => {
-                        console.log("Debug job:", job); // Kiểm tra dữ liệu job
-                        list.innerHTML += `
-                        <li>
-                            Tên công việc: ${job.name} - Trạng thái: ${job.jobStatusName} - Hạn: ${job.deadline} 
-                            (Người thực hiện: ${job.executedUserNames} - Người duyệt: ${job.approverUsername})
-                            <button data-job-id="${job.id}" onclick="editJobStatus(this)">Chỉnh sửa trạng thái</button>
-                        </li>`;
-                    });
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    document.getElementById("subordinatesJobList").innerHTML = "<li>Không thể tải danh sách công việc.</li>";
-                });
-        }
-
-        function editJobStatus(button) {
-            let jobId = button.getAttribute("data-job-id");
-
-            if (!jobId) {
-                alert("Lỗi: Không tìm thấy ID công việc!");
-                return;
-            }
-
-            console.log("Editing job with ID:", jobId);
-
-            let newStatusId = prompt("Nhập ID trạng thái mới cho công việc (1: Đang thực hiện, 2: Chờ duyệt, 3: Từ chối, 4: Hoàn thành):");
-
-            if (newStatusId) {
-                fetch(`/user/update-status?jobId=${jobId}&newStatusId=${newStatusId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                })
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error("Lỗi khi cập nhật trạng thái!");
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        alert("Cập nhật trạng thái thành công!");
-                        getSubordinatesJobs();
-                    })
-                    .catch(error => alert("Lỗi: " + error.message));
-            }
-        }
-
-
-        function fetchSubordinates() {
-            fetch("/user/sub-users")
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Dữ liệu API:", data); // Debug
-
-                    let tableBody = document.getElementById("subordinateTableBody");
-                    tableBody.innerHTML = ""; // Xóa dữ liệu cũ
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Không có nhân viên nào</td></tr>";
-                        return;
-                    }
-
-                    let rows = data.map(user =>
-                        `<tr>
-                            <td>${user.id}</td>
-                            <td>${user.fullName}</td>
-                            <td>${user.username}</td>
-                            <td>${user.address}</td>
-                           
-                        </tr>`
-                    ).join("");
-
-                    tableBody.insertAdjacentHTML("beforeend", rows);
-                })
-                .catch(error => {
-                    console.error("Lỗi:", error);
-                    document.getElementById("subordinateTableBody").innerHTML = "<tr><td colspan='5' style='text-align: center; color: red;'>Lỗi tải dữ liệu</td></tr>";
-                });
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("loadStatisticsBtn").addEventListener("click", function () {
-                fetch("/user/subordinate-statistics", { method: "GET", credentials: "include" })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Dữ liệu API nhận được:", data);
-
-                        if (Object.keys(data).length === 0) {
-                            alert("Không có dữ liệu để hiển thị!");
-                            return;
-                        }
-
-                        const labels = Object.keys(data);
-                        const values = Object.values(data);
-                        const ctx = document.getElementById("statisticsChart").getContext("2d");
-
-                        // Hủy biểu đồ cũ nếu có
-                        if (window.statisticsChart instanceof Chart) {
-                            window.statisticsChart.destroy();
-                        }
-
-                        // Vẽ biểu đồ mới với kích thước tự động
-                        window.statisticsChart = new Chart(ctx, {
-                            type: "pie",
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    data: values,
-                                    backgroundColor: ["#F44336", "#4CAF50", "#FF9800"],
-                                    hoverOffset: 10
-                                }]
-                            },
-                            options: {
-                                responsive: true,  // Biểu đồ tự động co giãn theo kích thước màn hình
-                                maintainAspectRatio: false, // Cho phép thay đổi tỉ lệ
-                                plugins: {
-                                    legend: { position: "bottom" }
-                                }
-                            }
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Lỗi khi lấy dữ liệu:", error);
-                        alert("Lỗi khi tải dữ liệu. Kiểm tra console!");
-                    });
-            });
-        });
-
-
-
-
-
-        // Kiểm tra xem người dùng đã đăng nhập chưa mỗi khi load trang
-        window.addEventListener('load', () => {
-            userId = sessionStorage.getItem("userId");
-            if (userId) {
-                showSection('myJobs'); // Hiển thị trang mặc định sau khi đăng nhập
-                document.getElementById("logoutButton").style.display = "block"; // Hiển thị nút đăng xuất
-                document.getElementById("loginButton").style.display = "none"; //ẩn nút đăng nhập
-            } else {
-                showSection('login'); // Hiển thị trang đăng nhập nếu chưa đăng nhập
-                document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất
-                document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
-            }
-        });
-
-
-        document.addEventListener("DOMContentLoaded", function () {
-            if (!sessionStorage.getItem("userId")) {
-                document.getElementById("logoutButton").style.display = "none"; // Ẩn nút đăng xuất nếu chưa đăng nhập
-                document.getElementById("loginButton").style.display = "block"; //hiển thị nút đăng nhập
-            }
-        });
-
-        // quản lý tài khoản
-        document.addEventListener("DOMContentLoaded", function () {
-            loadAccounts();
-        });
-
-        function loadAccounts() {
-            const accounts = [
-                { id: 1, name: "Nguyễn Văn A", email: "a@example.com", role: "Admin" },
-                { id: 2, name: "Trần Thị B", email: "b@example.com", role: "User" }
-            ];
-
-            let tableBody = document.getElementById("accountTableBody");
-            tableBody.innerHTML = "";
-
-            accounts.forEach(acc => {
-                let row = `<tr>
-            <td>${acc.id}</td>
-            <td>${acc.name}</td>
-            <td>${acc.email}</td>
-            <td>${acc.role}</td>
-            <td>
-                <button onclick="editAccount(${acc.id})"><i class="fa-solid fa-pen"></i> Sửa</button>
-                <button onclick="deleteAccount(${acc.id})"><i class="fa-solid fa-trash"></i> Xóa</button>
-            </td>
-        </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
-
-        function showAddAccountForm() {
-            alert("Hiển thị form thêm tài khoản");
-        }
-
-        function editAccount(id) {
-            alert("Chỉnh sửa tài khoản ID: " + id);
-        }
-
-        function deleteAccount(id) {
-            if (confirm("Bạn có chắc muốn xóa tài khoản ID: " + id + "?")) {
-                alert("Đã xóa tài khoản ID: " + id);
-            }
-        }
-
-    </script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

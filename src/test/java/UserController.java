@@ -2,7 +2,7 @@ package com.truong.controller;
 
 import com.truong.entities.Department;
 import com.truong.entities.Job;
-import com.truong.repository.UserReponsitory;
+import com.truong.repository.UserRepository;
 import com.truong.service.DepartmentService;
 import com.truong.service.JobService;
 import java.time.LocalDate;
@@ -42,7 +42,7 @@ public class UserController {
 	@Autowired
 	private DepartmentService departmentService;
 	@Autowired
-	private UserReponsitory userReponsitory;
+	private UserRepository userRepository;
 
 	@PostMapping("/login")
 	public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest,
@@ -54,7 +54,7 @@ public class UserController {
 			throw new AppException(ErrorCode.INVALID_USER);
 		}
 
-		User user = userReponsitory.findByUserName(userName)
+		User user = userRepository.findByUserName(userName)
 				.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
 		if (!password.equals(user.getPassword())) {
