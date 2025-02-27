@@ -1,4 +1,3 @@
-
 let userId = null;
 
 function showSection(sectionId) {
@@ -15,7 +14,6 @@ function showSection(sectionId) {
         loadAccounts();
     }
 }
-
 
 function login() {
     let username = document.getElementById("username").value;
@@ -231,10 +229,10 @@ function renderSubordinateTable(subordinates) {
 
     subordinates.forEach(member => {
         let row = `<tr>
-            <td>${member.fullname}</td>
-            <td>${member.departmentName}</td>
+            <td>${member.fullName}</td>
+            <td>${member.nameDepartment}</td>
             <td>
-                <button onclick="editMemberDepartment(${member.id}, '${member.fullname}', '${member.departmentId}')">
+                <button onclick="editMemberDepartment(${member.id}, '${member.fullName}', '${member.nameDepartment}')">
                     <i class="fa-solid fa-pen"></i> Sửa
                 </button>
             </td>
@@ -243,15 +241,16 @@ function renderSubordinateTable(subordinates) {
     });
 }
 
-async function editMemberDepartment(memberId, memberName, currentDeptId) {
-    let newDeptId = prompt(`Nhập ID phòng ban mới cho ${memberName}:`, currentDeptId);
-    if (!newDeptId || newDeptId === currentDeptId) return;
+// cập nhật phòng ban cho user
+async function editMemberDepartment(userId, memberName, currentDepartmentId) {
+    let newDepartmentId = prompt(`Nhập phòng ban mới cho ${memberName}:`, currentDepartmentId);
+    if (!newDepartmentId || newDepartmentId === currentDepartmentId) return;
 
     try {
-        let response = await fetch(`/api/subordinates/${memberId}/update-department`, {
+        let response = await fetch(`/user/updateUser/${userId}/`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ departmentId: newDeptId })
+            body: JSON.stringify({ departmentId: newDepartmentId })
         });
 
         if (response.ok) {
@@ -264,9 +263,56 @@ async function editMemberDepartment(memberId, memberName, currentDeptId) {
         console.error("Lỗi khi cập nhật phòng ban:", error);
     }
 }
+// thống kê của user
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("loadStatisticBtn").addEventListener("click", function () {
+        fetch("/user/userStatistics", { method: "GET", credentials: "include" })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Dữ liệu API nhận được:", data);
 
+                if (Object.keys(data).length === 0) {
+                    alert("Không có dữ liệu để hiển thị!");
+                    return;
+                }
 
-//
+                const labels = Object.keys(data);
+                const values = Object.values(data);
+                const ctx = document.getElementById("statisticChart").getContext("2d");
+
+                // Hủy biểu đồ cũ nếu có
+                if (window.statisticChart instanceof Chart) {
+                    window.statisticChart.destroy();
+                }
+
+                // Vẽ biểu đồ mới với kích thước tự động
+                window.statisticChart = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: ["#F44336", "#4CAF50", "#FF9800"],
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Biểu đồ tự động co giãn theo kích thước màn hình
+                        maintainAspectRatio: false, // Cho phép thay đổi tỉ lệ
+                        plugins: {
+                            legend: { position: "bottom" }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Lỗi khi lấy dữ liệu:", error);
+                alert("Lỗi khi tải dữ liệu. Kiểm tra console!");
+            });
+    });
+});
+
+// thống kê phòng ban con
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loadStatisticsBtn").addEventListener("click", function () {
         fetch("/user/subordinate-statistics", { method: "GET", credentials: "include" })
@@ -337,60 +383,34 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// quản lý phòng ban
-// async function loadDepartmentInfo() {
-//     try {
-//         let response = await fetch("http://localhost:8080/user/getCurrentUser", {
-//             method: "GET",
-//             credentials: "include"
-//         });
+// QUẢN LÝ PHÒNG BAN
+function flattenDepartments(departments) {
+    let result = [];
+    departments.forEach(dept => {
+        result.push({
+            subDepartmentId: dept.subDepartmentId,
+            subDepartmentName: dept.subDepartmentName,
+            parentDepartmentName: dept.parentDepartmentName ?? "Không có", // Lấy trực tiếp từ API
+            userCount: dept.userCount ?? 0
+        });
 
-//         if (!response.ok) {
-//             throw new Error("Không thể lấy thông tin người dùng.");
-//         }
+        // Đệ quy nếu có phòng ban con
+        if (Array.isArray(dept.subDepartments) && dept.subDepartments.length > 0) {
+            result = result.concat(flattenDepartments(dept.subDepartments));
+        }
+    });
+    return result;
+}
 
-//         let user = await response.json();
-//         let department = user.department;
-
-//         if (department) {
-//             document.getElementById("deptName").textContent = department.departmentName;
-//             document.getElementById("parentDept").textContent = department.parentDepartment
-//                 ? department.parentDepartment.departmentName
-//                 : "Không có (Cấp cao)";
-
-//             // Gọi API lấy số lượng nhân sự
-//             let empCountResponse = await fetch(`http://localhost:8080/department/getEmployeeCount?departmentId=${department.departmentId}`);
-//             let empCount = await empCountResponse.json();
-
-//             document.getElementById("numEmployees").textContent = empCount.count;
-
-//         } else {
-//             document.getElementById("departmentInfo").innerHTML = "<p>Người dùng không thuộc phòng ban nào.</p>";
-//         }
-
-//         // Hiển thị phần quản lý phòng ban sau khi tải dữ liệu
-//         document.getElementById("subdepartment").style.display = "block";
-
-//     } catch (error) {
-//         console.error("Lỗi khi tải thông tin phòng ban:", error);
-//     }
-// }
-
-// Gọi khi trang tải
-document.addEventListener("DOMContentLoaded", async function () {
-    await fetchUserDepartmentInfo();
-});
-
-// Lấy thông tin phòng ban của user
 async function fetchUserDepartmentInfo() {
     try {
-        let response = await fetch("http://localhost:8080/user/my-department", {
+        let response = await fetch("/user/my-department", {
             method: "GET",
             credentials: "include"
         });
 
         let result = await response.json();
-        console.log("Dữ liệu từ BE:", result); // Kiểm tra response
+        console.log("Dữ liệu từ API:", result);
 
         if (!result.success) {
             console.error("Lỗi từ server:", result.message);
@@ -399,43 +419,36 @@ async function fetchUserDepartmentInfo() {
         }
 
         let data = result.data;
-        console.log("Dữ liệu department:", data); // Debug dữ liệu
-
-        let tableBody = document.getElementById("departmentTableBody");
-        if (!tableBody) {
-            console.error("Không tìm thấy phần tử tableBody!");
-            return;
-        }
-        tableBody.innerHTML = "";
+        console.log("Thông tin phòng ban:", data);
 
         // Hiển thị thông tin phòng ban chính
-        if (data && data.departmentId) {
-            let mainRow = document.createElement("tr");
-            mainRow.innerHTML = `
-                <td>${data.departmentId}</td>
-                <td>${data.departmentName}</td>
-                <td>${data.parentDepartmentName || "Không có"}</td>
-                <td>${data.userCount}</td>
-                <td>
-                    <button onclick="editDepartment(${data.departmentId})">Sửa</button>
-                    <button onclick="deleteDepartment(${data.departmentId})">Xóa</button>
-                </td>
-            `;
-            tableBody.appendChild(mainRow);
-            console.log("Đã thêm phòng ban chính vào bảng");
-        } else {
-            console.warn("Không có dữ liệu phòng ban chính!");
-        }
+        document.getElementById("deptId").innerText = data.departmentId ?? "Không có";
+        document.getElementById("deptName").innerText = data.departmentName ?? "Không có";
+        document.getElementById("parentDept").innerText = data.parentDepartmentName ?? "Không có";
+        document.getElementById("numUser").innerText = data.userCount ?? 0;
+        document.getElementById("numEmployees").innerText = data.totalUserCount ?? 0;
 
-        // Hiển thị danh sách phòng ban con
-        if (Array.isArray(data.subDepartments) && data.subDepartments.length > 0) {
-            data.subDepartments.forEach(subDept => {
+        // Kiểm tra phần tử bảng tồn tại
+        let tableBody = document.getElementById("departmentTableBody");
+        if (!tableBody) {
+            console.error("Không tìm thấy phần tử departmentTableBody!");
+            return;
+        }
+        tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        // Chuyển danh sách phòng ban thành danh sách phẳng
+        let flatDepartments = flattenDepartments(data.subDepartments);
+        console.log("Danh sách phòng ban sau khi làm phẳng:", flatDepartments);
+
+        // Hiển thị danh sách phòng ban
+        if (flatDepartments.length > 0) {
+            flatDepartments.forEach(subDept => {
                 let row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${subDept.subDepartmentId}</td>
-                    <td>${subDept.subDepartmentName}</td>
-                    <td>${subDept.subparentDepartmentName || "Không có"}</td>
-                    <td>${subDept.userCounts}</td>
+                    <td>${subDept.subDepartmentId ?? "Không có"}</td>
+                    <td>${subDept.subDepartmentName ?? "Không có"}</td>
+                    <td>${subDept.parentDepartmentName ?? "Không có"}</td>
+                    <td>${subDept.userCount ?? 0}</td>
                     <td>
                         <button onclick="editDepartment(${subDept.subDepartmentId})">Sửa</button>
                         <button onclick="deleteDepartment(${subDept.subDepartmentId})">Xóa</button>
@@ -443,13 +456,53 @@ async function fetchUserDepartmentInfo() {
                 `;
                 tableBody.appendChild(row);
             });
-            console.log("Đã thêm danh sách phòng ban con vào bảng");
+            console.log("Đã hiển thị danh sách phòng ban.");
         } else {
-            console.warn("Không có phòng ban con!");
+            console.warn("Không có phòng ban con! Hiển thị thông báo rỗng.");
+            let row = document.createElement("tr");
+            row.innerHTML = `<td colspan="5" style="text-align: center;">Không có phòng ban con</td>`;
+            tableBody.appendChild(row);
         }
     } catch (error) {
         console.error("Lỗi khi fetch API:", error);
         alert("Lỗi kết nối đến server: " + error.message);
+    }
+}
+
+// thêm phòng ban
+async function showAddDepartment() {
+    let departmentName = prompt("Nhập tên phòng ban:");
+    let parentId = prompt("Nhập phòng ban cấp trên:");
+
+    if (!departmentName) {
+        return ("Nhập đầy đủ thông in!");
+    }
+
+    let newDepartment = {
+        departmentName: departmentName,
+        parentId: parentId ? parseInt(parentId) : null
+    };
+
+    try {
+        let response = await fetch("/user/department/createDepartment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include", // Gửi session từ trình duyệt 
+            body: JSON.stringify(newDepartment)
+        });
+        let result = await response.json();
+
+        if (response.ok) {
+            alert("Đã thêm phòng ban mới!");
+            fetchUserDepartmentInfo();
+        } else {
+            alert("Lỗi: " + result.message);
+        }
+    } catch (error) {
+        console.error("Lỗi khi thêm phòng ban:", error);
+        alert("Đã xảy ra lỗi khi kết nối đến server!");
     }
 }
 
@@ -468,7 +521,7 @@ async function editDepartment(departmentId) {
     };
 
     try {
-        let response = await fetch(`/user/department/update/${departmentId}`, {  
+        let response = await fetch(`/user/department/update/${departmentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestBody)
@@ -490,7 +543,7 @@ async function deleteDepartment(departmentId) {
     if (!confirm("Bạn có chắc muốn xóa phòng ban này?")) return;
 
     try {
-        let response = await fetch(`/user/department/delete/${departmentId}`, {  
+        let response = await fetch(`/user/department/delete/${departmentId}`, {
             method: "DELETE",
             credentials: "include",
             headers: { "Content-Type": "application/json" }
@@ -514,37 +567,118 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchUserDepartmentInfo();
 });
 
+// xem thông tin cá nhân
+async function userInfo() {
+    try {
+        let response = await fetch("/user/userInfo");
+        let myAccount = await response.json();
+        console.log("Dữ liệu nhận được:", myAccount);
 
+        // Chuyển object thành array nếu cần
+        let userList = Array.isArray(myAccount) ? myAccount : [myAccount];
 
-// quản lý tài khoản
-document.addEventListener("DOMContentLoaded", function () {
-    loadAccounts();
-});
+        renderMyAccountTable(userList);
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu cá nhân:", error);
+    }
+}
 
-
-
-// Hiển thị danh sách tài khoản
-function loadAccounts() {
-    let tableBody = document.getElementById("accountTableBody");
+function renderMyAccountTable(myAccount) {
+    let tableBody = document.getElementById("myAccountTableBody");
     tableBody.innerHTML = "";
 
-    accounts.forEach(acc => {
+    myAccount.forEach(userinfo => {
         let row = `<tr>
-        <td>${acc.id}</td>
-        <td>${acc.fullname}</td>
-        <td>${acc.username}</td>
-        <td>${acc.password}</td>
-        <td>${acc.address}</td>
-        <td>
-            <button onclick="editAccount(${acc.id})"><i class="fa-solid fa-pen"></i> Sửa</button>
-            <button onclick="deleteAccount(${acc.id})"><i class="fa-solid fa-trash"></i> Xóa</button>
-        </td>
-    </tr>`;
+            <td>${userinfo.fullName}</td>
+            <td>${userinfo.password}</td>
+            <td>${userinfo.address}</td>
+            <td>
+                <button onclick="editMyInfor(${userinfo.id})">
+                    <i class="fa-solid fa-pen"></i> Sửa
+                </button>
+            </td>
+        </tr>`;
         tableBody.innerHTML += row;
     });
 }
 
-// Hiển thị form thêm tài khoản
+
+// sửa tt cá nhân n
+async function editMyInfor(userId) {
+    let newFullName = prompt("Nhập fullname:");
+    if (!newFullName) return alert("Fullname không được để trống!");
+
+    let newPassword = prompt("Nhập password:");
+    if (!newPassword) return alert("Password không được để trống!");
+
+    let newAddress = prompt("Nhập address:");
+    if (!newAddress) return alert("Address không được để trống!");
+
+    let requestBody = {
+        fullName: newFullName,  
+        password: newPassword,
+        address: newAddress
+    };
+
+    try {
+        let response = await fetch(`/user/updateUser/${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+        });
+
+        let data = await response.json();
+        alert(data.message);
+
+        if (data.success) {
+            userInfo();
+        }
+    } catch (error) {
+        console.error("Lỗi khi cập nhật User:", error);
+        alert("Có lỗi xảy ra!");
+    }
+}
+
+
+// quản lý tài khoản hệ thống
+// Hiển thị danh sách tài khoản
+async function loadAccounts() {
+    try {
+        let response = await fetch("/user/sub-users");
+        let manageAccounts = await response.json();
+        console.log("Dữ liệu nhận được:", manageAccounts);
+
+        // Chuyển object thành array nếu cần
+        let userLists = Array.isArray(manageAccounts) ? manageAccounts : [manageAccounts];
+
+        renderAccountTable(userLists);
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu cá nhân:", error);
+    }
+}
+
+function renderAccountTable(manageAccounts) {
+    let tableBody = document.getElementById("accountTableBody");
+    tableBody.innerHTML = "";
+
+    manageAccounts.forEach(loadAccounts => {
+        let row = `<tr>
+            <td>${loadAccounts.id}</td>
+            <td>${loadAccounts.fullName}</td>
+            <td>${loadAccounts.userName}</td>
+            <td>${loadAccounts.password}</td>
+            <td>${loadAccounts.address}</td>
+           <td>
+                <button onclick="updateUser(${loadAccounts.id}, '${loadAccounts.fullName}', '${loadAccounts.userName}', '${loadAccounts.password}', '${loadAccounts.address}')">Sửa</button>
+                <button onclick="deleteUser(${loadAccounts.id})">Xóa</button>
+                    </td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+}
+
+
+// Hiển thị form thêm tài khoản d
 async function showAddAccountForm() {
     let fullName = prompt("Nhập tên đầy đủ:");
     let userName = prompt("Nhập tên đăng nhập:");
@@ -566,12 +700,12 @@ async function showAddAccountForm() {
     };
 
     try {
-        let response = await fetch("http://localhost:8080/user/createUser", {
+        let response = await fetch("user/createUser", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            credentials: "include", // Gửi session từ trình duyệt 
+            credentials: "include",
             body: JSON.stringify(newUser)
         });
 
@@ -588,35 +722,66 @@ async function showAddAccountForm() {
     }
 }
 
+async function updateUser(userId) {
+    console.log("Gửi updateUser với userId:", userId, "Kiểu dữ liệu:", typeof userId);
+    if (isNaN(userId)) {
+        alert("Lỗi: userId không hợp lệ!");
+        return;
+    }
+    let newFullname = prompt("Nhập fullname: ");
+    if (!newFullname) return alert("Fullname không được để trống!");
 
+    let newUserName = prompt("Nhập username: ");
+    if (!newUserName) return alert("Username không được để trống!");
 
-// Chỉnh sửa tài khoản
-function editAccount(id) {
-    let account = accounts.find(acc => acc.id === id);
-    if (!account) return;
+    let newPassword = prompt("Nhập password: ");
+    if (!newPassword) return alert("Password không được để trống!");
 
-    let newFullname = prompt("Nhập tên đầy đủ mới:", account.fullname);
-    let newUsername = prompt("Nhập tên đăng nhập mới:", account.username);
-    let newPassword = prompt("Nhập mật khẩu mới:", account.password);
-    let newAddress = prompt("Nhập địa chỉ mới:", account.address);
+    let newAddress = prompt("Nhập address: ");
+    if (!newAddress) return alert("Address không được để trống!");
 
-    if (newFullname && newUsername && newPassword && newAddress) {
-        account.fullname = newFullname;
-        account.username = newUsername;
-        account.password = newPassword;
-        account.address = newAddress;
-        loadAccounts();
-        alert("Đã cập nhật tài khoản!");
-    } else {
-        alert("Thông tin không hợp lệ!");
+    let requestBody = {
+        fullName: newFullname,
+        userName: newUserName,
+        password: newPassword,
+        address: newAddress
+    };
+
+    try {
+        let response = await fetch(`/user/updateUser/${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+        });
+        let data = await response.json();
+        alert(data.message);
+        if (data.success) {
+            loadAccounts();
+        }
+    } catch (error) {
+        console.error("Lỗi khi cập nhật User: ", error);
+        alert("Có lỗi xảy ra!");
     }
 }
 
-// Xóa tài khoản
-function deleteAccount(id) {
-    if (confirm("Bạn có chắc muốn xóa tài khoản này?")) {
-        accounts = accounts.filter(acc => acc.id !== id);
-        loadAccounts();
-        alert("Đã xóa tài khoản!");
+// Xóa tài khoản user n
+async function deleteUser(userId) {
+    if (!confirm("Bạn muốn xóa User này?")) return;
+    try {
+        let response = await fetch(`/user/deleteUser/${userId}`, {
+            method: "DELETE",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" }
+        });
+        let rs = await response.json();
+        if (rs.success) {
+            alert("Đã xóa User thành công!");
+            loadAccounts();
+        } else {
+            alert("Lỗi: " + rs.message);
+        }
+    } catch (error) {
+        console.error("Lỗi khi xóa User:", error);
+        alert("Đã xảy ra lỗi khi kết nối đến server!");
     }
 }

@@ -220,6 +220,20 @@ public class JobService {
 		throw new RuntimeException("Không có quyền thay đổi trạng thái này!");
 	}
 
+	// thống kê cá nhân
+	public Map<String, Long> countJobsByExecutedUser(Long userId) {
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new RuntimeException("Không tồn tại user"));
+
+	    List<Object[]> rs = jobRepository.countJobByExecutedUserStatus(user);
+
+	    return rs.stream().collect(Collectors.toMap(
+	            row -> ((JobStatus) row[0]).getJobStatusName(), 
+	            row -> (Long) row[1]                           
+	    ));
+	}
+	
+	// thống kê phòng ban con
 	public Map<String, Long> countJobsByStatusForSubordinates(Long approverId) {
 		User approver = userRepository.findById(approverId)
 				.orElseThrow(() -> new RuntimeException("Người duyệt không tồn tại!"));

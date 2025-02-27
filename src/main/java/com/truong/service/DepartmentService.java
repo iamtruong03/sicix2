@@ -3,9 +3,11 @@ package com.truong.service;
 import com.truong.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -44,87 +46,106 @@ public class DepartmentService {
 		return subDepartments;
 	}
 
-	// Lấy thông tin phòng ban của người dùng
-	public Map<String, Object> getDepartmentInfo(Long userId) {
-		User user = userRepository.findById(userId).orElse(null);
-		if (user == null) {
-			throw new RuntimeException("User không tồn tại");
-		}
-
-		// Nếu user là admin (department_id = null), lấy toàn bộ phòng ban
-		if (user.getDepartment() == null) {
-			List<Department> allDepartments = departmentRepository.findAll();
-			List<Map<String, Object>> departmentList = new ArrayList<>();
-
-			for (Department dept : allDepartments) {
-				int userCount = userRepository.countByDepartment(dept);
-				departmentList.add(Map.of("departmentId", dept.getDepartmentId(), "departmentName",
-						dept.getNameDepartment(), "parentDepartmentName",
-						dept.getParentDepartment() != null ? dept.getParentDepartment().getNameDepartment()
-								: "Không có",
-						"userCount", userCount));
-			}
-
-			return Map.of("departments", departmentList); // Trả về danh sách toàn bộ phòng ban
-		}
-
-		// Nếu không phải admin, chỉ lấy thông tin phòng ban của user
-		Department department = user.getDepartment();
-
-		String departmentName = department.getNameDepartment();
-		String parentDepartmentName = (department.getParentDepartment() != null)
-				? department.getParentDepartment().getNameDepartment()
-				: "Không có";
-
-		List<Department> subDepartments = getAllSubDepartments(department);
-
-		List<Map<String, Object>> subDepartmentDetails = new ArrayList<>();
-		int userCount = userRepository.countByDepartment(department); // Nhân sự phòng ban hiện tại
-		int totalUserCount = userCount;
-
-		for (Department subDept : subDepartments) {
-			int subDeptUserCount = userRepository.countByDepartment(subDept);
-			totalUserCount += subDeptUserCount;
-
-			Map<String, Object> subDeptInfo = Map.of("subDepartmentId", subDept.getDepartmentId(), "subDepartmentName",
-					subDept.getNameDepartment(), "subparentDepartmentName",
-					subDept.getParentDepartment() != null ? subDept.getParentDepartment().getNameDepartment()
-							: "Không có",
-					"userCounts", subDeptUserCount);
-			subDepartmentDetails.add(subDeptInfo);
-		}
-
-		return Map.of("departmentId", department.getDepartmentId(), "departmentName", departmentName,
-				"parentDepartmentName", parentDepartmentName, "userCount", userCount, "totalUserCount", totalUserCount,
-				"subDepartments", subDepartmentDetails);
-	}
-
 	// list user con, cháu, chắt
 	public List<UserDTO> getUsersByDepartment(Long departmentId) {
-		// Lấy phòng ban cha từ ID
 		Department parentDepartment = departmentRepository.findById(departmentId)
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ban với ID: " + departmentId));
 
-		// Lấy danh sách tất cả phòng ban con
 		List<Department> subDepartments = getAllSubDepartments(parentDepartment);
 
-		// Lấy danh sách ID của các phòng ban con
 		List<Long> departmentIds = subDepartments.stream().map(Department::getDepartmentId)
 				.collect(Collectors.toList());
 
-		// Nếu không có phòng ban con => trả về danh sách rỗng
 		if (departmentIds.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		// Lấy danh sách user thuộc các phòng ban con và chuyển đổi sang DTO
 		return userRepository.findByDepartmentIds(departmentIds).stream()
-				.map(user -> new UserDTO(user.getId(), user.getFullName(), user.getUserName(), user.getAddress(),
+				.map(user -> new UserDTO(user.getId(), user.getFullName(), user.getUserName(), user.getPassword() , user.getAddress(),
 						user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null
 
 				)).collect(Collectors.toList());
 
 	}
+
+	public Map<String, Object> getDepartmentInfo(Long userId) {
+	    User user = userRepository.findById(userId).orElse(null);
+	    if (user == null) {
+	        throw new RuntimeException("User không tồn tại");
+	    }
+
+	    List<Map<String, Object>> subDepartmentDetails = new ArrayList<>();
+	    int totalUserCount = 0;
+
+	    if (user.getDepartment() == null) {
+	        // Trường hợp Admin (Xem toàn bộ phòng ban)
+	        List<Department> allDepartments = departmentRepository.findAll();
+
+	        for (Department dept : allDepartments) {
+	            int userCount = userRepository.countByDepartment(dept);
+	            totalUserCount += userCount;
+
+	            String parentDepartmentName = Optional.ofNullable(dept.getParentDepartment())
+	                                                  .map(Department::getNameDepartment)
+	                                                  .orElse("Không có");
+
+	            Map<String, Object> subDeptInfo = new HashMap<>();
+	            subDeptInfo.put("subDepartmentId", dept.getDepartmentId());
+	            subDeptInfo.put("subDepartmentName", Objects.requireNonNullElse(dept.getNameDepartment(), "Không xác định"));
+	            subDeptInfo.put("parentDepartmentName", parentDepartmentName);
+	            subDeptInfo.put("userCount", userCount);
+
+	            subDepartmentDetails.add(subDeptInfo);
+	        }
+
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("departmentId", null);
+	        response.put("departmentName", "Tất cả phòng ban");
+	        response.put("parentDepartmentName", "Không có");
+	        response.put("userCount", 0);
+	        response.put("totalUserCount", totalUserCount);
+	        response.put("subDepartments", subDepartmentDetails);
+
+	        return response;
+	    }
+
+	    // Nếu là user thường, lấy thông tin phòng ban hiện tại
+	    Department department = user.getDepartment();
+	    int userCount = userRepository.countByDepartment(department);
+	    totalUserCount = userCount;
+
+	    List<Department> subDepartments = getAllSubDepartments(department);
+	    for (Department subDept : subDepartments) {
+	        int subDeptUserCount = userRepository.countByDepartment(subDept);
+	        totalUserCount += subDeptUserCount;
+
+	        String parentDepartmentName = Optional.ofNullable(subDept.getParentDepartment())
+	                                              .map(Department::getNameDepartment)
+	                                              .orElse("Không có");
+
+	        Map<String, Object> subDeptInfo = new HashMap<>();
+	        subDeptInfo.put("subDepartmentId", subDept.getDepartmentId());
+	        subDeptInfo.put("subDepartmentName", Objects.requireNonNullElse(subDept.getNameDepartment(), "Không xác định"));
+	        subDeptInfo.put("parentDepartmentName", parentDepartmentName);
+	        subDeptInfo.put("userCount", subDeptUserCount);
+
+	        subDepartmentDetails.add(subDeptInfo);
+	    }
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("departmentId", department.getDepartmentId());
+	    response.put("departmentName", Objects.requireNonNullElse(department.getNameDepartment(), "Không xác định"));
+	    response.put("parentDepartmentName", Optional.ofNullable(department.getParentDepartment())
+	                                                 .map(Department::getNameDepartment)
+	                                                 .orElse("Không có"));
+	    response.put("userCount", userCount);
+	    response.put("totalUserCount", totalUserCount);
+	    response.put("subDepartments", subDepartmentDetails);
+
+	    return response;
+	}
+
+
 
 	// thêm phòng ban
 	public Map<String, Object> createDepartment(Long userId, String departmentName, Long parentId) {
@@ -188,66 +209,47 @@ public class DepartmentService {
 	// sửa phòng ban
 	public Map<String, Object> updateDepartment(Long userId, Long departmentId, String newDepartmentName,
 			Long newParentId) {
-		// Kiểm tra User có tồn tại không
 		User user = userRepository.findById(userId).orElse(null);
-		if (user == null) {
-			return Map.of("success", false, "message", "Người dùng không tồn tại");
-		}
-
-		// Kiểm tra phòng ban cần sửa có tồn tại không
 		Department department = departmentRepository.findById(departmentId).orElse(null);
-		if (department == null) {
-			return Map.of("success", false, "message", "Phòng ban không tồn tại");
+
+		if (user == null || department == null) {
+			return Map.of("success", false, "message", "Người dùng hoặc phòng ban không tồn tại");
 		}
 
-		// Kiểm tra quyền sửa phòng ban
 		if (!isUserAuthorizedToEdit(user, department)) {
 			return Map.of("success", false, "message", "Bạn không có quyền sửa phòng ban này");
 		}
 
-		// Kiểm tra tên mới hợp lệ
 		if (newDepartmentName == null || newDepartmentName.trim().isEmpty()) {
 			return Map.of("success", false, "message", "Tên phòng ban không hợp lệ");
 		}
 
-		// Nếu có phòng ban cha mới
 		if (newParentId != null) {
-			// Không cho phép phòng ban trở thành con của chính nó
 			if (newParentId.equals(departmentId)) {
 				return Map.of("success", false, "message", "Phòng ban không thể làm cha của chính nó");
 			}
 
-			// Lấy phòng ban cha mới
 			Department newParentDepartment = departmentRepository.findById(newParentId).orElse(null);
 			if (newParentDepartment == null) {
 				return Map.of("success", false, "message", "Phòng ban cha mới không tồn tại");
 			}
 
-			// Lấy danh sách các phòng ban con từ hàm getAllSubDepartments()
-			List<Department> allowedParentDepartments = getAllSubDepartments(department);
-
-			// Kiểm tra nếu newParentId không nằm trong danh sách được phép
-			boolean isValidParent = allowedParentDepartments.stream()
-					.anyMatch(subDept -> subDept.getDepartmentId().equals(newParentId));
-
-			if (!isValidParent) {
-				return Map.of("success", false, "message",
-						"Phòng ban cha mới không hợp lệ. Chỉ có thể chọn từ danh sách phòng ban con hợp lệ.");
-			}
-
-			// Kiểm tra nếu newParentDepartment là con/cháu của department thì không cho
-			// phép cập nhật
+			// Kiểm tra nếu newParentId là con/cháu của department (tránh vòng lặp)
 			List<Department> subDepartments = getAllSubDepartments(department);
 			if (subDepartments.stream().anyMatch(subDept -> subDept.getDepartmentId().equals(newParentId))) {
-				return Map.of("success", false, "message",
-						"Không thể chuyển phòng ban thành con của chính nó hoặc con/cháu của nó");
+				return Map.of("success", false, "message", "Không thể đặt phòng ban cha mới là con/cháu của chính nó");
 			}
 
-			if (department.getParentDepartment() != null && newParentDepartment.getParentDepartment() != null) {
-				if (department.getParentDepartment().getDepartmentId()
-						.equals(newParentDepartment.getParentDepartment().getDepartmentId())) {
+			// Kiểm tra nếu newParentId có nằm trong phạm vi quản lý của user không
+			if (user.getDepartment() != null) {
+				List<Department> userSubDepartments = getAllSubDepartments(user.getDepartment());
+				userSubDepartments.add(user.getDepartment()); // Thêm chính phòng ban của user
+				boolean isParentValid = userSubDepartments.stream()
+						.anyMatch(dept -> dept.getDepartmentId().equals(newParentId));
+
+				if (!isParentValid) {
 					return Map.of("success", false, "message",
-							"Không thể chuyển phòng ban thành ngang cấp với phòng ban cũ");
+							"Bạn chỉ có thể đổi cha trong phạm vi phòng ban của mình");
 				}
 			}
 
@@ -255,27 +257,25 @@ public class DepartmentService {
 		}
 
 		department.setNameDepartment(newDepartmentName);
-
-		// Lưu thay đổi
 		departmentRepository.save(department);
 		return Map.of("success", true, "message", "Cập nhật phòng ban thành công");
 	}
 
 	private boolean isUserAuthorizedToEdit(User user, Department department) {
-		// Admin có quyền sửa tất cả
 		if (user.getDepartment() == null) {
 			return true;
 		}
 
-		// Lấy danh sách tất cả phòng ban con của phòng ban của user
-		List<Department> subDepartments = getAllSubDepartments(department);
+		if (user.getDepartment().getDepartmentId().equals(department.getDepartmentId())) {
+			return true;
+		}
+		List<Department> subDepartments = getAllSubDepartments(user.getDepartment());
+		boolean hasPermission = subDepartments.stream()
+				.anyMatch(subDept -> subDept.getDepartmentId().equals(department.getDepartmentId()));
 
-		// Kiểm tra nếu phòng ban cần sửa nằm trong danh sách phòng ban con
-		return subDepartments.contains(department);
+		return hasPermission;
 	}
 
-	// xóa phòng ban:chỉ user department_id Null xóa hoặc userParentId xóa và Không
-	// cho phép xóa nếu còn user
 	public Map<String, Object> deleteDepartment(Long userId, Long departmentId) {
 		User user = userRepository.findById(userId).get();
 
@@ -286,12 +286,10 @@ public class DepartmentService {
 
 		List<Department> subDepartments = getAllSubDepartments(department);
 
-		// Kiểm tra nếu phòng ban hoặc phòng ban con nào còn nhân sự
 		if (hasUsersInDepartmentOrSub(department, subDepartments)) {
 			return Map.of("success", false, "message", "Không thể xóa vì phòng ban hoặc phòng ban con còn nhân sự");
 		}
 
-		// Xóa tất cả phòng ban con trước khi xóa phòng ban chính
 		departmentRepository.deleteAll(subDepartments);
 		departmentRepository.delete(department);
 

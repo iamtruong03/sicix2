@@ -145,6 +145,26 @@
         .statistics-section {
             margin-bottom: 20px;
         }
+
+        #addDepartmentForm {
+            display: none;
+            /* Ẩn form thêm phòng ban mặc định */
+            margin-bottom: 20px;
+        }
+
+        #addDepartmentForm label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #addDepartmentForm input[type="text"],
+        #addDepartmentForm input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 
@@ -256,14 +276,13 @@
             <ul id="subordinatesJobList"></ul>
         </div>
 
-   
-        
         <div id="subdepartment" class="section" style="display: none;">
             <h2>Quản Lý Phòng Ban</h2>
-        
+            <h3>Thông Tin Phòng Ban Của Bạn</h3>
+            <button onclick="fetchUserDepartmentInfo()">Xem thông tin</button>
+            <button onclick="showAddDepartment()">Thêm Phòng Ban</button>
+
             <div id="departmentInfo">
-                <h3>Thông Tin Phòng Ban Của Bạn</h3>
-                <button onclick="fetchUserDepartmentInfo()">Xem thông tin</button>
                 <p><strong>ID:</strong> <span id="deptId"></span></p>
                 <table border="1">
                     <tr>
@@ -284,11 +303,7 @@
                     </tr>
                 </table>
             </div>
-            
-        
-            <button onclick="showAddDepartmentForm()">
-                <i class="fa-solid fa-plus"></i> Thêm Phòng Ban
-            </button>
+            <!-- <button onclick="showAddDepartmentForm()">Thêm Phòng Ban</button> -->
             <table border="1">
                 <thead>
                     <tr>
@@ -304,10 +319,6 @@
                 </tbody>
             </table>
         </div>
-        
-        
-        
-        
 
         <div id="subordinates" class="section hidden">
             <h2>Nhân Viên</h2>
@@ -323,13 +334,14 @@
                 <tbody id="subordinateTableBody"></tbody>
             </table>
         </div>
-        
-
         <div id="myStatistics" class="section hidden statistics-section">
             <h2>Thống kê của tôi</h2>
-            <button onclick="getMyStatistics()">Xem thống kê</button>
+            <button id="loadStatisticBtn">Xem thống kê</button>
+            <div style="width: 80%; max-width: 500px; margin: auto;">
+                <canvas id="statisticChart"></canvas>
+            </div>
         </div>
-        <div id="departmentStatistics" class="section">
+        <div id="departmentStatistics" class="section hidden">
             <h2>Thống kê công việc phòng ban</h2>
             <button id="loadStatisticsBtn">Xem biểu đồ</button>
             <div style="width: 80%; max-width: 500px; margin: auto;">
@@ -337,10 +349,11 @@
             </div>
         </div>
 
-        
-        <div id="myAccount" class="section" style="display: none;">
+
+        <div id="myAccount" class="section hidden" style="display: none;">
             <h2>Thông Tin Tài Khoản</h2>
-            <table border="1">
+            <table border="1" id="myAccountTable">
+                <button onclick="userInfo()">Xem Thông Tin </button>
                 <thead>
                     <tr>
                         <th>Tên đầy đủ</th>
@@ -349,18 +362,20 @@
                         <th>Hành Động</th>
                     </tr>
                 </thead>
-                <tbody id="accountTableBody">
+                <tbody id="myAccountTableBody">
                     <!-- Dữ liệu tài khoản sẽ được thêm vào đây -->
                 </tbody>
             </table>
         </div>
 
-        <div id="manageAccounts" class="section" style="display: none;">
+        <div id="manageAccounts" class="section hidden" style="display: none;">
             <h2>Quản Lý Tài Khoản</h2>
-            <button onclick="showAddAccountForm()">
-                <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
-            </button>
-            <table border="1">
+
+            <table border="1" id="accountTable">
+                <button onclick="loadAccounts()">Xem thông tin</button>
+                <button onclick="showAddAccountForm()">
+                    <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
+                </button>
                 <thead>
                     <tr>
                         <th>ID</th>

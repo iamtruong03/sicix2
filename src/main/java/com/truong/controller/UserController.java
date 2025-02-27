@@ -186,6 +186,31 @@ public class UserController {
 		}
 	}
 
+	// thống kê phòng ban con
+	@GetMapping("/subordinate-statistics")
+	public ResponseEntity<Map<String, Long>> getSubordinateJobStatistics(@SessionAttribute("userId") Long userId) {
+		Map<String, Long> statistics = jobService.countJobsByStatusForSubordinates(userId);
+		return ResponseEntity.ok(statistics);
+	}
+
+	// thống kê của user
+	@GetMapping("/userStatistics")
+	public ResponseEntity<Map<String, Long>> getUserJobStatistics(@SessionAttribute("userId") Long userId) {
+		Map<String, Long> statistic = jobService.countJobsByExecutedUser(userId);
+		return ResponseEntity.ok(statistic);
+	}
+
+	// xem thông tin cá nhân
+	@GetMapping("/userInfo")
+	public ResponseEntity<UserDTO> getInfoUser(@SessionAttribute("userId") Long userId) {
+		try {
+			return ResponseEntity.ok(userService.getUserDTOById(userId));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
+
+	// xem thông tin user
 	@GetMapping("/sub-users")
 	public ResponseEntity<List<UserDTO>> getSubUsers(HttpSession session) {
 		Long userId = (Long) session.getAttribute("userId");
@@ -196,10 +221,26 @@ public class UserController {
 		return ResponseEntity.ok(subUsers);
 	}
 
-	@GetMapping("/subordinate-statistics")
-	public ResponseEntity<Map<String, Long>> getSubordinateJobStatistics(@SessionAttribute("userId") Long userId) {
-		Map<String, Long> statistics = jobService.countJobsByStatusForSubordinates(userId);
-		return ResponseEntity.ok(statistics);
+	// sửa user
+	@PutMapping("/updateUser/{userId}")
+	public ResponseEntity<?> updateUser(@PathVariable Long userId, @SessionAttribute("userId") Long currentUserId,
+			@RequestBody UserDTO userDTO) {
+		userService.updateUser(userId, currentUserId, userDTO);
+		return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật thành công!"));
+	}
+
+	// xóa user
+	@DeleteMapping("/deleteUser/{userId}")
+	public ResponseEntity<?> deleteUser(@PathVariable Long userId, @SessionAttribute("userId") Long sessionUserId) {
+		try {
+			userService.deleteUser(userId, sessionUserId);
+			return ResponseEntity.ok().body(Map.of("message", "User deleted successfully"));
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Internal server error"));
+		}
 	}
 
 	// xem danh sách phòng ban
@@ -228,22 +269,16 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(Map.of("success", false, "message", "Người dùng chưa đăng nhập"));
 		}
-
 		String departmentName = (String) request.get("departmentName");
 		if (departmentName == null || departmentName.trim().isEmpty()) {
 			return ResponseEntity.badRequest()
 					.body(Map.of("success", false, "message", "Tên phòng ban không được để trống"));
 		}
-
 		Long parentId = null;
 		if (request.containsKey("parentId") && request.get("parentId") instanceof Number) {
 			parentId = ((Number) request.get("parentId")).longValue();
 		}
-
-		// Gọi service để tạo phòng ban
 		Map<String, Object> response = departmentService.createDepartment(userId, departmentName, parentId);
-
-		// Trả về phản hồi dựa trên kết quả
 		if (Boolean.TRUE.equals(response.get("success"))) {
 			return ResponseEntity.ok(response);
 		} else {

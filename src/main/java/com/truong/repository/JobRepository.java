@@ -21,11 +21,16 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 	List<Job> findJobsOfSubordinates(@Param("approver") User approver,
 			@Param("subordinateUsers") List<User> subordinateUsers);
 
-	@Query("SELECT j.jobStatus, COUNT(DISTINCT j) " +
-		       "FROM Job j JOIN j.executedUsers u " +
-		       "WHERE u.id IN :subordinateIds " +
-		       "GROUP BY j.jobStatus")
-		List<Object[]> countJobsByStatusForSubordinates(@Param("subordinateIds") List<Long> subordinateIds);
+	@Query("SELECT j.jobStatus, COUNT(DISTINCT j) " + "FROM Job j JOIN j.executedUsers u "
+			+ "WHERE u.id IN :subordinateIds " + "GROUP BY j.jobStatus")
+	List<Object[]> countJobsByStatusForSubordinates(@Param("subordinateIds") List<Long> subordinateIds);
+
+	@Query("SELECT j.jobStatus, COUNT(DISTINCT j) FROM Job j JOIN j.executedUsers u WHERE u = :user GROUP BY j.jobStatus")
+	List<Object[]> countJobByExecutedUserStatus(@Param("user") User user);
+
+	@Query("SELECT COUNT(j) > 0 FROM Job j WHERE j.approverId.id = :id")
+	boolean existsByApproverId(@Param("id") Long id);
+
 
 
 //  @Query("SELECT j FROM Job j WHERE j.executedId.id = :executedId " +
