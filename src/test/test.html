@@ -1,0 +1,20 @@
+<div id="editAccountForm" class="hidden">
+    <h3>Chỉnh sửa tài khoản</h3>
+
+    <input type="hidden" id="editUserId">
+
+    <label for="editFullName">Tên đầy đủ:</label>
+    <input type="text" id="editFullName">
+
+    <label for="editUserName">Tên đăng nhập:</label>
+    <input type="text" id="editUserName">
+
+    <label for="editPassword">Mật khẩu:</label>
+    <input type="password" id="editPassword">
+
+    <label for="editAddress">Địa chỉ:</label>
+    <input type="text" id="editAddress">
+
+    <button onclick="updateAccount()">Lưu</button>
+    <button onclick="document.getElementById('editAccountForm').style.display='none'">Hủy</button>
+</div>

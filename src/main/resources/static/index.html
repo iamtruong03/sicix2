@@ -165,6 +165,220 @@
             border: 1px solid #ccc;
             box-sizing: border-box;
         }
+
+
+        /* ==== BẢNG QUẢN LÝ TÀI KHOẢN ==== */
+        #manageAccounts {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* ==== CÁC NÚT CHỨC NĂNG ==== */
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        /* ==== NÚT THÊM TÀI KHOẢN ==== */
+        button.add-btn {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* ==== NÚT SỬA ==== */
+        button.edit-btn {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        /* ==== NÚT XÓA ==== */
+        button.delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* ==== FORM CHUNG CHO THÊM & SỬA ==== */
+        #addAccountForm,
+        #editAccountForm {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-top: 10px;
+        }
+
+        #addAccountForm h3,
+        #editAccountForm h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* ==== INPUT & SELECT ==== */
+        #addAccountForm label,
+        #editAccountForm label {
+            display: block;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        #addAccountForm input,
+        #editAccountForm input,
+        #addAccountForm select,
+        #editAccountForm select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* ==== NÚT LƯU & HỦY ==== */
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: #218838;
+        }
+
+        .cancel-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333;
+        }
+
+
+        /* ==== NÚT CHÍNH (Thêm phòng ban) ==== */
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* ==== FORM THÊM PHÒNG BAN ==== */
+        #addDepartmentForm {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-top: 10px;
+        }
+
+        #addDepartmentForm h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* ==== Ô INPUT & SELECT ==== */
+        #addDepartmentForm label {
+            display: block;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        #addDepartmentForm input,
+        #addDepartmentForm select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* ==== NÚT LƯU & HỦY ==== */
+        #addDepartmentForm button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        #addDepartmentForm button:nth-child(3) {
+            /* Nút Lưu */
+            background-color: #28a745;
+        }
+
+        #addDepartmentForm button:nth-child(3):hover {
+            background-color: #218838;
+        }
+
+        #addDepartmentForm button:nth-child(4) {
+            /* Nút Hủy */
+            background-color: #dc3545;
+        }
+
+        #addDepartmentForm button:nth-child(4):hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 
@@ -175,23 +389,9 @@
         </a>
 
         <div class="dropdown">
-            <a class="dropdown-btn" href="#" onclick="event.preventDefault();">
+            <a class="dropdown-btn" href="#" onclick="event.preventDefault(); showManageJob()">
                 <i class="fa-solid fa-briefcase"></i> Quản Lý Công Việc
             </a>
-            <div class="dropdown-content">
-                <a href="#" onclick="event.preventDefault();showSection('myJobs')">
-                    <i class="fa-solid fa-list-check"></i> Công Việc Của Tôi
-                </a>
-                <a href="#" onclick="event.preventDefault();showSection('subordinatesJobs')">
-                    <i class="fa-solid fa-user-group"></i> Công Việc Cấp Dưới
-                </a>
-                <a href="#" onclick="event.preventDefault();showSection('createJob')">
-                    <i class="fa-solid fa-plus"></i> Giao Công Việc
-                </a>
-                <a href="#" onclick="event.preventDefault();showSection('createApproveJob')">
-                    <i class="fa-solid fa-check"></i> Tạo Công Việc
-                </a>
-            </div>
         </div>
 
         <div class="dropdown">
@@ -201,9 +401,6 @@
             <div class="dropdown-content">
                 <a href="#" onclick="event.preventDefault();showSection('subdepartment')">
                     <i class="fa-solid fa-sitemap"></i> Phòng Ban
-                </a>
-                <a href="#" onclick="event.preventDefault();showSection('subordinates')">
-                    <i class="fa-solid fa-user-tie"></i> Nhân Viên
                 </a>
             </div>
         </div>
@@ -230,9 +427,6 @@
                 <a href="#" onclick="event.preventDefault();showSection('myAccount')">
                     <i class="fa-solid fa-user"></i> Tài Khoản Của Tôi
                 </a>
-                <a href="#" onclick="event.preventDefault();showSection('manageAccounts')">
-                    <i class="fa-solid fa-users"></i> Tài Khoản Nhân Viên
-                </a>
             </div>
         </div>
         <a href="#" id="logoutButton" onclick="event.preventDefault();logout()">
@@ -248,39 +442,85 @@
             <button onclick="login()">Đăng nhập</button>
         </div>
 
-        <div id="createJob" class="section hidden">
-            <h2>Giao Công Việc</h2>
-            <input type="text" id="jobNameCreate" placeholder="Tên công việc">
-            <input type="date" id="deadlineCreate"> <input type="text" id="executedIdCreate"
-                placeholder="Người thực hiện">
+        <div id="manageJob" class="hidden">
+            <h2>Quản Lý Công Việc</h2>
+            <div class="tab-buttons">
+                <button onclick="showJobSection('myJob')">Công Việc Của Tôi</button>
+                <button onclick="showJobSection('subordinatesJobs')">Công Việc Cấp Dưới</button>
+                <button onclick="showJobSection('createJob')">Giao Công Việc</button>
+                <button onclick="showJobSection('createApproveJob')">Tạo Công Việc</button>
+            </div>
 
-            <button onclick="createJob()">Tạo</button>
+            <div id="myJob" class="job-section hidden">
+                <h3>Công Việc Của Tôi</h3>
+                <button onclick="getMyJobs()">Xem Công Việc</button>
+                <ul id="myJobList"></ul>
+            </div>
+
+            <div id="subordinatesJobs" class="job-section hidden">
+                <h3>Công Việc Cấp Dưới</h3>
+                <button onclick="getSubordinatesJobs()">Xem Công Việc</button>
+                <ul id="subordinatesJobList"></ul>
+            </div>
+
+            <div id="createJob" class="job-section hidden">
+                <h3>Giao Công Việc</h3>
+                <input type="text" id="jobNameCreate" placeholder="Tên công việc">
+                <input type="date" id="deadlineCreate">
+                <input type="text" id="executedIdCreate" placeholder="Người thực hiện">
+                <button onclick="createJob()">Tạo</button>
+            </div>
+
+            <div id="createApproveJob" class="job-section hidden">
+                <h3>Tạo Công Việc</h3>
+                <input type="text" id="jobNameApprove" placeholder="Tên công việc">
+                <input type="date" id="deadlineApprove">
+                <button onclick="createApproveJob()">Tạo</button>
+            </div>
         </div>
 
-        <div id="createApproveJob" class="section hidden">
-            <h2>Tạo Công Việc</h2>
-            <input type="text" id="jobNameApprove" placeholder="Tên công việc">
-            <input type="date" id="deadlineApprove">
-            <button onclick="createApproveJob()">Tạo</button>
-        </div>
-
-        <div id="myJobs" class="section hidden">
-            <h2>Công Việc Của Tôi</h2>
-            <button onclick="getMyJobs()">Xem Công Việc</button>
-            <ul id="myJobList"></ul>
-        </div>
-
-        <div id="subordinatesJobs" class="section hidden">
-            <h2>Công Việc Cấp Dưới</h2>
-            <button onclick="getSubordinatesJobs()">Xem Công Việc</button>
-            <ul id="subordinatesJobList"></ul>
-        </div>
 
         <div id="subdepartment" class="section" style="display: none;">
             <h2>Quản Lý Phòng Ban</h2>
+
             <h3>Thông Tin Phòng Ban Của Bạn</h3>
             <button onclick="fetchUserDepartmentInfo()">Xem thông tin</button>
-            <button onclick="showAddDepartment()">Thêm Phòng Ban</button>
+
+            <div>
+                <button onclick="showAddDepartmentForm()">Thêm Phòng Ban</button>
+                <div id="addDepartmentForm" style="display: none;">
+                    <h3>Thêm Phòng Ban</h3>
+
+                    <label for="deptNewName">Tên phòng ban:</label>
+                    <input type="text" id="deptNewName">
+
+                    <label for="parentNewDept">Phòng ban cấp trên:</label>
+                    <select id="parentNewDept">
+                        <option value="">-- Không có --</option>
+                    </select>
+
+                    <button onclick="showAddDepartment()">Lưu</button>
+                    <button class="cancel-btn" onclick="showAddDepartmentForm()">Hủy</button>
+                </div>
+
+                <div id="editDepartmentForm" style="display: none;">
+                    <h3>Chỉnh Sửa Phòng Ban</h3>
+    
+                    <label for="editNameDepartment">Tên phòng ban:</label>
+                    <input type="text" id="editNameDepartment">
+    
+                    <label for="parentDepartment">Phòng ban cấp trên:</label>
+                    <select id="parentDepartment">
+                        <option value="">-- Chọn phòng ban --</option>
+                    </select>
+    
+                    <button id="saveEditDepartment" onclick="saveEditDepartment()">Lưu</button>
+                    <button class="cancel-btn" onclick="hideEditDepartment()">Hủy</button>
+                </div>
+
+            </div>
+
+            
 
             <div id="departmentInfo">
                 <p><strong>ID:</strong> <span id="deptId"></span></p>
@@ -303,7 +543,8 @@
                     </tr>
                 </table>
             </div>
-            <!-- <button onclick="showAddDepartmentForm()">Thêm Phòng Ban</button> -->
+
+            <h3>Danh sách Phòng Ban</h3>
             <table border="1">
                 <thead>
                     <tr>
@@ -315,25 +556,88 @@
                     </tr>
                 </thead>
                 <tbody id="departmentTableBody">
-                    <!-- Dữ liệu phòng ban sẽ được thêm vào đây -->
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Đang tải...</td>
+                    </tr>
                 </tbody>
             </table>
+
+            <div id="manageAccounts">
+                <h3>Danh Sách Nhân Viên</h3>
+                <button onclick="loadAccounts()">Xem thông tin</button>
+                <button class="add-btn" onclick="showAddAccountForm()">Thêm tài khoản</button>
+
+                <div id="addAccountForm">
+                    <h3>Thêm Tài Khoản Nhân Viên</h3>
+
+                    <label for="newFullName">Tên đầy đủ:</label>
+                    <input type="text" id="newFullName">
+
+                    <label for="newUserName">Tên đăng nhập:</label>
+                    <input type="text" id="newUserName">
+
+                    <label for="newPassword">Mật khẩu:</label>
+                    <input type="text" id="newPassword">
+
+                    <label for="newAddress">Địa chỉ:</label>
+                    <input type="text" id="newAddress">
+
+                    <label for="parentDepartment">Phòng ban cấp trên:</label>
+                    <select id="parentDepartment">
+                        <option value="">-- Chọn phòng ban --</option>
+                    </select>
+
+                    <button class="save-btn" onclick="showAddAccount()">Lưu</button>
+                    <button class="cancel-btn" onclick="showAddAccountForm()">Hủy</button>
+                </div>
+
+                <div id="editAccountForm" style="display: none;">
+                    <h3>Chỉnh Sửa Tài Khoản</h3>
+
+                    <label for="editFullName">Tên đầy đủ:</label>
+                    <input type="text" id="editFullName">
+
+                    <label for="editUserName">Tên đăng nhập:</label>
+                    <input type="text" id="editUserName">
+
+                    <label for="editPassword">Mật khẩu:</label>
+                    <input type="text" id="editPassword">
+
+                    <label for="editAddress">Địa chỉ:</label>
+                    <input type="text" id="editAddress">
+
+                    <label for="editDepartment">Phòng ban cấp trên:</label>
+                    <select id="editDepartment">
+                        <option value="">-- Chọn phòng ban --</option>
+                    </select>
+
+                    <button id="saveEditAccount" onclick="saveEditAccount()">Lưu</button>
+                    <button class="cancel-btn" onclick="hideEditAccountForm()">Hủy</button>
+
+                </div>
+                <table border="1" id="accountTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đầy đủ</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Mật khẩu</th>
+                            <th>Địa chỉ</th>
+                            <th>Phòng Ban</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Đang tải...</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
         </div>
 
-        <div id="subordinates" class="section hidden">
-            <h2>Nhân Viên</h2>
-            <button onclick="fetchSubordinates()">Xem Nhân Viên</button>
-            <table id="subordinateTable">
-                <thead>
-                    <tr>
-                        <th>Họ Tên</th>
-                        <th>Phòng Ban</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody id="subordinateTableBody"></tbody>
-            </table>
-        </div>
         <div id="myStatistics" class="section hidden statistics-section">
             <h2>Thống kê của tôi</h2>
             <button id="loadStatisticBtn">Xem thống kê</button>
@@ -367,30 +671,10 @@
                 </tbody>
             </table>
         </div>
+        </tbody>
+        </table>
+    </div> -->
 
-        <div id="manageAccounts" class="section hidden" style="display: none;">
-            <h2>Quản Lý Tài Khoản</h2>
-
-            <table border="1" id="accountTable">
-                <button onclick="loadAccounts()">Xem thông tin</button>
-                <button onclick="showAddAccountForm()">
-                    <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
-                </button>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên đầy đủ</th>
-                        <th>Tên đăng nhập</th>
-                        <th>Mật khẩu</th>
-                        <th>Địa chỉ</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody id="accountTableBody">
-                    <!-- Dữ liệu tài khoản sẽ được thêm vào đây -->
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script src="js/script.js"></script>

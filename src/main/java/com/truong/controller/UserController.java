@@ -243,6 +243,27 @@ public class UserController {
 		}
 	}
 
+	// lấy list phòng ban: bao gồm phòng ban con và chính nó
+	@GetMapping("/department/list")
+	public ResponseEntity<?> getDepartmentList(HttpSession session) {
+		Long userId = (Long) session.getAttribute("userId");
+		if (userId == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Map.of("success", false, "message", "Người dùng chưa đăng nhập"));
+		}
+
+		User user = userRepository.findById(userId).orElse(null);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(Map.of("success", false, "message", "Không tìm thấy người dùng"));
+		}
+
+		Department userDepartment = user.getDepartment();
+		List<Map<String, Object>> departments = departmentService.getDepartmentList(userDepartment);
+
+		return ResponseEntity.ok(Map.of("success", true, "data", departments));
+	}
+
 	// xem danh sách phòng ban
 	@GetMapping("/my-department")
 	public ResponseEntity<?> getDepartmentInfo(HttpSession session) {

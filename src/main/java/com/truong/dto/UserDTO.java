@@ -19,8 +19,6 @@ public class UserDTO {
 				user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null,
 				user.getDepartment() != null ? user.getDepartment().getDepartmentId() : null);
 	}
-	
-	
 
 	public UserDTO() {
 		super();
@@ -37,14 +35,14 @@ public class UserDTO {
 		this.departmentId = departmentId;
 	}
 	
-	public UserDTO(Long id, String fullName, String userName, String password, String address, String nameDepartment) {
-		this.id = id;
-		this.fullName = fullName;
-		this.userName = userName;
-		this.password = password;
-		this.address = address;
-		this.nameDepartment = nameDepartment;
-	}
+//	public UserDTO(Long id, String fullName, String userName, String password, String address, String nameDepartment) {
+//		this.id = id;
+//		this.fullName = fullName;
+//		this.userName = userName;
+//		this.password = password;
+//		this.address = address;
+//		this.nameDepartment = nameDepartment;
+//	}
 
 	public Long getId() {
 		return id;

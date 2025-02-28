@@ -211,58 +211,6 @@ function editJobStatus(button) {
             .catch(error => alert("Lỗi: " + error.message));
     }
 }
-
-// quản trị thành viên
-async function fetchSubordinates() {
-    try {
-        let response = await fetch("/user/sub-users"); // Gọi API lấy danh sách thành viên
-        let subordinates = await response.json();
-        renderSubordinateTable(subordinates);
-    } catch (error) {
-        console.error("Lỗi khi tải danh sách thành viên:", error);
-    }
-}
-
-function renderSubordinateTable(subordinates) {
-    let tableBody = document.getElementById("subordinateTableBody");
-    tableBody.innerHTML = "";
-
-    subordinates.forEach(member => {
-        let row = `<tr>
-            <td>${member.fullName}</td>
-            <td>${member.nameDepartment}</td>
-            <td>
-                <button onclick="editMemberDepartment(${member.id}, '${member.fullName}', '${member.nameDepartment}')">
-                    <i class="fa-solid fa-pen"></i> Sửa
-                </button>
-            </td>
-        </tr>`;
-        tableBody.innerHTML += row;
-    });
-}
-
-// cập nhật phòng ban cho user
-async function editMemberDepartment(userId, memberName, currentDepartmentId) {
-    let newDepartmentId = prompt(`Nhập phòng ban mới cho ${memberName}:`, currentDepartmentId);
-    if (!newDepartmentId || newDepartmentId === currentDepartmentId) return;
-
-    try {
-        let response = await fetch(`/user/updateUser/${userId}/`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ departmentId: newDepartmentId })
-        });
-
-        if (response.ok) {
-            alert("Cập nhật phòng ban thành công!");
-            fetchSubordinates(); // Refresh danh sách
-        } else {
-            alert("Cập nhật thất bại!");
-        }
-    } catch (error) {
-        console.error("Lỗi khi cập nhật phòng ban:", error);
-    }
-}
 // thống kê của user
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loadStatisticBtn").addEventListener("click", function () {
@@ -383,6 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
 // QUẢN LÝ PHÒNG BAN
 function flattenDepartments(departments) {
     let result = [];
@@ -450,7 +399,7 @@ async function fetchUserDepartmentInfo() {
                     <td>${subDept.parentDepartmentName ?? "Không có"}</td>
                     <td>${subDept.userCount ?? 0}</td>
                     <td>
-                        <button onclick="editDepartment(${subDept.subDepartmentId})">Sửa</button>
+                        <button onclick="showEditDepartment(${subDept.subDepartmentId})">Sửa</button>
                         <button onclick="deleteDepartment(${subDept.subDepartmentId})">Xóa</button>
                     </td>
                 `;
@@ -469,13 +418,65 @@ async function fetchUserDepartmentInfo() {
     }
 }
 
+//
+async function loadParentDepartment1() {
+    try {
+        let response = await fetch("/user/department/list", { credentials: "include" });
+        let result = await response.json();
+
+        if (!response.ok || !result.success) {
+            console.error("Lỗi khi lấy danh sách phòng ban:", result.message);
+            return;
+        }
+
+        let select = document.getElementById("parentNewDept");
+        select.innerHTML = `<option value="">-- Không có (Mặc định) --</option>`; // Reset danh sách
+
+        if (result.data.length === 0) {
+            console.warn("Không có phòng ban nào!");
+            return;
+        }
+
+        result.data.forEach(dept => {
+            let option = document.createElement("option");
+            option.value = dept.departmentId;
+            option.textContent = dept.nameDepartment;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi kết nối server:", error);
+    }
+}
+
+function showAddDepartmentForm() {
+    let addForm = document.getElementById("addDepartmentForm");
+    let editForm = document.getElementById("editDepartmentForm");
+
+    if (addForm.style.display === "none" || addForm.style.display === "") {
+        addForm.style.display = "block";   
+        editForm.style.display = "none";   
+        loadParentDepartment1();            
+    } else {
+        addForm.style.display = "none"; 
+        clearAddDepartment();
+    }
+}
+
+// xóa dữ liệu nhập 
+function clearAddDepartment(){
+    document.getElementById("deptNewName").value ="";
+    document.getElementById("parentNewDept").value ="";
+}
+
 // thêm phòng ban
 async function showAddDepartment() {
-    let departmentName = prompt("Nhập tên phòng ban:");
-    let parentId = prompt("Nhập phòng ban cấp trên:");
+    let departmentName = document.getElementById("deptNewName").value.trim();
+    let parentId = document.getElementById("parentNewDept").value || null;
 
     if (!departmentName) {
-        return ("Nhập đầy đủ thông in!");
+        alert("Vui lòng nhập tên phòng ban!");
+        return;
     }
 
     let newDepartment = {
@@ -496,7 +497,8 @@ async function showAddDepartment() {
 
         if (response.ok) {
             alert("Đã thêm phòng ban mới!");
-            fetchUserDepartmentInfo();
+            showAddDepartmentForm(); 
+            fetchUserDepartmentInfo(); 
         } else {
             alert("Lỗi: " + result.message);
         }
@@ -506,37 +508,52 @@ async function showAddDepartment() {
     }
 }
 
+// hiển thị form sửa phòng ban
+function showEditDepartment(){
+    let editForm = document.getElementById("editDepartmentForm");
+    editForm.style.display = "block";
+    loadParentDepartment2();
 
-// Chỉnh sửa phòng ban
-async function editDepartment(departmentId) {
-    let newName = prompt("Nhập tên mới:");
-    if (!newName) return alert("Tên phòng ban không được để trống!");
-
-    let newParentId = prompt("Nhập ID phòng ban cha mới (nếu có):");
-    newParentId = newParentId ? parseInt(newParentId) : null;
-
-    let requestBody = {
-        newDepartmentName: newName,
-        newParentId: newParentId
+    document.getElementById("editNameDepartment").value = nameDepartment;
+    document.getElementById("parentDepartment").value = { departmentId: parseInt(departmentId) };
+    editForm.dataset.subDepartmentId = id;
+}
+// gửi yêu cầu cập nhật phòng ban
+async function saveEditDepartment() {
+    let subDepartmentId = document.getElementById("editDepartmentForm").dataset.subDepartmentId;
+    if (!subDepartmentId) {
+        alert("Lỗi: Không tìm thấy phòng ban!");
+        return;
+    }
+    let updateDepartment = {
+        nameDepartment: document.getElementById("editNameDepartment").value.trim(),
+        newParentId : document.getElementById("parentDepartment").value || null,
     };
-
     try {
         let response = await fetch(`/user/department/update/${departmentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(updateDepartment)
         });
-
-        let data = await response.json();
-        alert(data.message);
-        if (data.success) {
+        if (response.ok) {
+            alert("Cập nhật phòng ban thành công!");
+            hideEditDepartment();
             fetchUserDepartmentInfo();
+        } else {
+            alert("Lỗi: " + result.message);
         }
     } catch (error) {
         console.error("Lỗi khi cập nhật phòng ban:", error);
-        alert("Có lỗi xảy ra!");
+        alert("Đã xảy ra lỗi khi kết nối đến server!");
     }
+    
 }
+
+// Ẩn form sửa phòng ban
+function hideEditDepartment() {
+    document.getElementById("editDepartmentForm").style.display = "none";
+}
+
 
 // Xóa phòng ban
 async function deleteDepartment(departmentId) {
@@ -567,6 +584,8 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchUserDepartmentInfo();
 });
 
+
+// QUẢN LÝ TÀI KHOẢN
 // xem thông tin cá nhân
 async function userInfo() {
     try {
@@ -615,7 +634,7 @@ async function editMyInfor(userId) {
     if (!newAddress) return alert("Address không được để trống!");
 
     let requestBody = {
-        fullName: newFullName,  
+        fullName: newFullName,
         password: newPassword,
         address: newAddress
     };
@@ -640,8 +659,7 @@ async function editMyInfor(userId) {
 }
 
 
-// quản lý tài khoản hệ thống
-// Hiển thị danh sách tài khoản
+// QUẢN LÝ NHÂN VIÊN
 async function loadAccounts() {
     try {
         let response = await fetch("/user/sub-users");
@@ -657,6 +675,7 @@ async function loadAccounts() {
     }
 }
 
+// hiển thị danh sách tài khoản
 function renderAccountTable(manageAccounts) {
     let tableBody = document.getElementById("accountTableBody");
     tableBody.innerHTML = "";
@@ -668,8 +687,9 @@ function renderAccountTable(manageAccounts) {
             <td>${loadAccounts.userName}</td>
             <td>${loadAccounts.password}</td>
             <td>${loadAccounts.address}</td>
+            <td>${loadAccounts.nameDepartment}</td>
            <td>
-                <button onclick="updateUser(${loadAccounts.id}, '${loadAccounts.fullName}', '${loadAccounts.userName}', '${loadAccounts.password}', '${loadAccounts.address}')">Sửa</button>
+                <button onclick="showEditAccountForm(${loadAccounts.id}, '${loadAccounts.fullName}', '${loadAccounts.userName}', '${loadAccounts.password}', '${loadAccounts.address}', '${loadAccounts.nameDepartment}')">Sửa</button>
                 <button onclick="deleteUser(${loadAccounts.id})">Xóa</button>
                     </td>
         </tr>`;
@@ -677,15 +697,70 @@ function renderAccountTable(manageAccounts) {
     });
 }
 
+// lấy dữ liệu list phòng ban cha
+async function loadParentDepartment2() {
+    try {
+        let response = await fetch("/user/my-department", { credentials: "include" });
+        let result = await response.json();
+
+        if (!response.ok || !result.success) {
+            console.error("Lỗi khi lấy danh sách phòng ban:", result.message);
+            return;
+        }
+
+        let select = document.getElementById("parentDepartment");
+        select.innerHTML = `<option value="">-- Không có (Mặc định) --</option>`; // Reset danh sách
+
+        // Kiểm tra nếu không có phòng ban con
+        if (!result.data.subDepartments || result.data.subDepartments.length === 0) {
+            console.warn("Không có phòng ban nào!");
+            return;
+        }
+
+        // Duyệt qua danh sách phòng ban con
+        result.data.subDepartments.forEach(dept => {
+            let option = document.createElement("option");
+            option.value = dept.subDepartmentId;
+            option.textContent = dept.subDepartmentName;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi kết nối server:", error);
+    }
+}
+
+// Hiển thị/Ẩn form thêm tài khoản
+function showAddAccountForm() {
+    let addForm = document.getElementById("addAccountForm");
+    let editForm = document.getElementById("editAccountForm");
+
+    if (addForm.style.display === "none" || addForm.style.display === "") {
+        addForm.style.display = "block";   
+        editForm.style.display = "none";   
+        loadParentDepartment2();            
+    } else {
+        addForm.style.display = "none";    
+        clearAddAccountForm();             
+    }
+}
+
+// Xóa dữ liệu nhập trong form thêm tài khoản
+function clearAddAccountForm() {
+    document.getElementById("newFullName").value = "";
+    document.getElementById("newUserName").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("newAddress").value = "";
+    document.getElementById("parentDepartment").value = "";
+}
 
 // Hiển thị form thêm tài khoản d
-async function showAddAccountForm() {
-    let fullName = prompt("Nhập tên đầy đủ:");
-    let userName = prompt("Nhập tên đăng nhập:");
-    let password = prompt("Nhập mật khẩu:");
-    let address = prompt("Nhập địa chỉ:");
-    let departmentId = prompt("Nhập ID phòng ban:");
-
+async function showAddAccount() {
+    let fullName = document.getElementById("newFullName").value.trim();
+    let userName = document.getElementById("newUserName").value.trim();
+    let password = document.getElementById("newPassword").value.trim();
+    let address = document.getElementById("newAddress").value.trim();
+    let departmentId = document.getElementById("parentDepartment").value || null;
     if (!fullName || !userName || !password || !address || !departmentId) {
         alert("Vui lòng nhập đầy đủ thông tin!");
         return;
@@ -713,6 +788,9 @@ async function showAddAccountForm() {
 
         if (response.ok) {
             alert("Đã thêm tài khoản mới!");
+            clearAddAccountForm();  
+            showAddAccountForm();   
+            loadAccounts();
         } else {
             alert("Lỗi: " + result.message);
         }
@@ -722,46 +800,95 @@ async function showAddAccountForm() {
     }
 }
 
-async function updateUser(userId) {
-    console.log("Gửi updateUser với userId:", userId, "Kiểu dữ liệu:", typeof userId);
-    if (isNaN(userId)) {
-        alert("Lỗi: userId không hợp lệ!");
+async function loadParentDepartment3() {
+    try {
+        let response = await fetch("/user/department/list", { credentials: "include" });
+        let result = await response.json();
+
+        if (!response.ok || !result.success) {
+            console.error("Lỗi khi lấy danh sách phòng ban:", result.message);
+            return;
+        }
+
+        let select = document.getElementById("editDepartment");
+        select.innerHTML = `<option value="">-- Không có (Mặc định) --</option>`; // Reset danh sách
+
+        if (result.data.length === 0) {
+            console.warn("Không có phòng ban nào!");
+            return;
+        }
+
+        result.data.forEach(dept => {
+            let option = document.createElement("option");
+            option.value = dept.departmentId;
+            option.textContent = dept.nameDepartment;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi kết nối server:", error);
+    }
+}
+
+// Hiển thị form chỉnh sửa tài khoản
+function showEditAccountForm(id, fullName, userName, password, address, departmentId) {
+    let editForm = document.getElementById("editAccountForm");
+    editForm.style.display = "block";
+    loadParentDepartment3();
+
+    document.getElementById("editFullName").value = fullName;
+    document.getElementById("editUserName").value = userName;
+    document.getElementById("editPassword").value = password;
+    document.getElementById("editAddress").value = address;
+    document.getElementById("editDepartment").value = { departmentId: parseInt(departmentId) };
+    editForm.dataset.userId = id;
+}
+
+// Gửi yêu cầu cập nhật tài khoản
+async function saveEditAccount() {
+    let userId = document.getElementById("editAccountForm").dataset.userId;
+
+    if (!userId) {
+        alert("Lỗi: Không tìm thấy ID người dùng!");
         return;
     }
-    let newFullname = prompt("Nhập fullname: ");
-    if (!newFullname) return alert("Fullname không được để trống!");
 
-    let newUserName = prompt("Nhập username: ");
-    if (!newUserName) return alert("Username không được để trống!");
-
-    let newPassword = prompt("Nhập password: ");
-    if (!newPassword) return alert("Password không được để trống!");
-
-    let newAddress = prompt("Nhập address: ");
-    if (!newAddress) return alert("Address không được để trống!");
-
-    let requestBody = {
-        fullName: newFullname,
-        userName: newUserName,
-        password: newPassword,
-        address: newAddress
+    let updatedAccount = {
+        fullName: document.getElementById("editFullName").value.trim(),
+        userName: document.getElementById("editUserName").value.trim(),
+        password: document.getElementById("editPassword").value.trim(),
+        address: document.getElementById("editAddress").value.trim(),
+        departmentId: document.getElementById("editDepartment").value || null,
     };
 
     try {
         let response = await fetch(`/user/updateUser/${userId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(updatedAccount)
         });
-        let data = await response.json();
-        alert(data.message);
-        if (data.success) {
+
+        let result = await response.json();
+
+        if (response.ok) {
+            alert("Cập nhật tài khoản thành công!");
+            hideEditAccountForm();
             loadAccounts();
+        } else {
+            alert("Lỗi: " + result.message);
         }
     } catch (error) {
-        console.error("Lỗi khi cập nhật User: ", error);
-        alert("Có lỗi xảy ra!");
+        console.error("Lỗi khi cập nhật tài khoản:", error);
+        alert("Đã xảy ra lỗi khi kết nối đến server!");
     }
+}
+
+// Ẩn form sửa tài khoản
+function hideEditAccountForm() {
+    document.getElementById("editAccountForm").style.display = "none";
 }
 
 // Xóa tài khoản user n
@@ -778,7 +905,7 @@ async function deleteUser(userId) {
             alert("Đã xóa User thành công!");
             loadAccounts();
         } else {
-            alert("Lỗi: " + rs.message);
+            alert(rs.message);
         }
     } catch (error) {
         console.error("Lỗi khi xóa User:", error);

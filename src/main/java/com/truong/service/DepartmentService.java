@@ -45,28 +45,57 @@ public class DepartmentService {
 		}
 		return subDepartments;
 	}
+	
+	// lấy phòng ban hiện tại + con cháu...
+	public List<Map<String, Object>> getDepartmentList(Department department) {
+        List<Department> listDepartment = new ArrayList<>();
+
+        if (department != null) {
+            listDepartment.add(department); // Thêm phòng ban hiện tại
+            listDepartment.addAll(getAllSubDepartments(department)); // Thêm phòng ban con cháu
+        } else {
+            listDepartment.addAll(departmentRepository.findAll()); // Nếu không có phòng ban, lấy tất cả
+        }
+
+        // Chuyển đổi danh sách chỉ lấy departmentId và nameDepartment
+        return listDepartment.stream()
+                .map(dept -> {
+                    Map<String, Object> deptMap = new HashMap<>();
+                    deptMap.put("departmentId", dept.getDepartmentId());
+                    deptMap.put("nameDepartment", dept.getNameDepartment());
+                    return deptMap;
+                })
+                .collect(Collectors.toList());
+    }
 
 	// list user con, cháu, chắt
 	public List<UserDTO> getUsersByDepartment(Long departmentId) {
-		Department parentDepartment = departmentRepository.findById(departmentId)
-				.orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ban với ID: " + departmentId));
+	    Department parentDepartment = departmentRepository.findById(departmentId)
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ban với ID: " + departmentId));
 
-		List<Department> subDepartments = getAllSubDepartments(parentDepartment);
+	    List<Department> subDepartments = getAllSubDepartments(parentDepartment);
 
-		List<Long> departmentIds = subDepartments.stream().map(Department::getDepartmentId)
-				.collect(Collectors.toList());
+	    List<Long> departmentIds = subDepartments.stream()
+	            .map(Department::getDepartmentId)
+	            .collect(Collectors.toList());
 
-		if (departmentIds.isEmpty()) {
-			return Collections.emptyList();
-		}
+	    if (departmentIds.isEmpty()) {
+	        return Collections.emptyList();
+	    }
 
-		return userRepository.findByDepartmentIds(departmentIds).stream()
-				.map(user -> new UserDTO(user.getId(), user.getFullName(), user.getUserName(), user.getPassword() , user.getAddress(),
-						user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null
-
-				)).collect(Collectors.toList());
-
+	    return userRepository.findByDepartmentIds(departmentIds).stream()
+	            .map(user -> new UserDTO(
+	                    user.getId(),
+	                    user.getFullName(),
+	                    user.getUserName(),
+	                    user.getPassword(),
+	                    user.getAddress(),
+	                    user.getDepartment() != null ? user.getDepartment().getNameDepartment() : null, 
+	                    user.getDepartment() != null ? user.getDepartment().getDepartmentId() : null 
+	            ))
+	            .collect(Collectors.toList());
 	}
+
 
 	public Map<String, Object> getDepartmentInfo(Long userId) {
 	    User user = userRepository.findById(userId).orElse(null);
@@ -78,7 +107,6 @@ public class DepartmentService {
 	    int totalUserCount = 0;
 
 	    if (user.getDepartment() == null) {
-	        // Trường hợp Admin (Xem toàn bộ phòng ban)
 	        List<Department> allDepartments = departmentRepository.findAll();
 
 	        for (Department dept : allDepartments) {
@@ -109,7 +137,6 @@ public class DepartmentService {
 	        return response;
 	    }
 
-	    // Nếu là user thường, lấy thông tin phòng ban hiện tại
 	    Department department = user.getDepartment();
 	    int userCount = userRepository.countByDepartment(department);
 	    totalUserCount = userCount;
