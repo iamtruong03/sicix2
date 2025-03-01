@@ -399,7 +399,7 @@ async function fetchUserDepartmentInfo() {
                     <td>${subDept.parentDepartmentName ?? "Không có"}</td>
                     <td>${subDept.userCount ?? 0}</td>
                     <td>
-                        <button onclick="showEditDepartment(${subDept.subDepartmentId})">Sửa</button>
+                        <button onclick="showEditDepartment(${subDept.subDepartmentId}, '${subDept.subDepartmentName}', ${subDept.parentDepartmentId})">Sửa</button>
                         <button onclick="deleteDepartment(${subDept.subDepartmentId})">Xóa</button>
                     </td>
                 `;
@@ -480,7 +480,7 @@ async function showAddDepartment() {
     }
 
     let newDepartment = {
-        departmentName: departmentName,
+        nameDepartment: nameDepartment,
         parentId: parentId ? parseInt(parentId) : null
     };
 
@@ -509,15 +509,17 @@ async function showAddDepartment() {
 }
 
 // hiển thị form sửa phòng ban
-function showEditDepartment(){
+function showEditDepartment(subDepartmentId, nameDepartment, parentDepartmentId) {
     let editForm = document.getElementById("editDepartmentForm");
     editForm.style.display = "block";
-    loadParentDepartment2();
+    loadParentDepartment2(); 
 
     document.getElementById("editNameDepartment").value = nameDepartment;
-    document.getElementById("parentDepartment").value = { departmentId: parseInt(departmentId) };
-    editForm.dataset.subDepartmentId = id;
+    document.getElementById("parentDepartment").value = parentDepartmentId ?? "";
+    editForm.dataset.subDepartmentId = subDepartmentId;
 }
+
+
 // gửi yêu cầu cập nhật phòng ban
 async function saveEditDepartment() {
     let subDepartmentId = document.getElementById("editDepartmentForm").dataset.subDepartmentId;
@@ -525,16 +527,23 @@ async function saveEditDepartment() {
         alert("Lỗi: Không tìm thấy phòng ban!");
         return;
     }
+    
+    // Chuyển giá trị newParentId sang số nếu có, nếu không thì là null
+    let parentValue = document.getElementById("parentDepartment").value;
     let updateDepartment = {
         nameDepartment: document.getElementById("editNameDepartment").value.trim(),
-        newParentId : document.getElementById("parentDepartment").value || null,
+        newParentId: parentValue ? parseInt(parentValue) : null
     };
+
     try {
-        let response = await fetch(`/user/department/update/${departmentId}`, {
+        let response = await fetch(`/user/department/update/${subDepartmentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(updateDepartment)
         });
+
+        let result = await response.json();
         if (response.ok) {
             alert("Cập nhật phòng ban thành công!");
             hideEditDepartment();
@@ -546,8 +555,9 @@ async function saveEditDepartment() {
         console.error("Lỗi khi cập nhật phòng ban:", error);
         alert("Đã xảy ra lỗi khi kết nối đến server!");
     }
-    
 }
+
+    
 
 // Ẩn form sửa phòng ban
 function hideEditDepartment() {
